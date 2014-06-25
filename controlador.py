@@ -61,7 +61,6 @@ class ControladorHoneynet(DynamicPolicy):
 			if opcode == 1:
 				#paquete ICMP
 				print "Se ha recibido un paquete ICMP"
-				#Se determinará cual es la direcciond e broadcast de la red.
 				ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
 				broadacas_IP = os.system(ipBcast)
 				if broadacas_IP == dstip:
