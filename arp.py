@@ -39,8 +39,5 @@ def ejecutarARP(pkt, network, IpPuerto):
 	        except:
 			print "Error en el envio de la respuesta ARP"
 	            	print pkt
-
-
-#Otro comentario
-    					
-#este es un nuevo cambio para probar gutHub for windows
+			
+#Clase terminada  completamente... Funcionando!!!!
