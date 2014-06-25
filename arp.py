@@ -15,11 +15,11 @@ from pyretic.lib.query import *
 
 
 def ejecutarARP(pkt, network, IpPuerto):
-	switch = pkt['switch']
-    inport = pkt['inport']
-    srcip  = pkt['srcip']        
-    dstip  = pkt['dstip']        
-    opcode = pkt['protocol']
+    	switch = pkt['switch']
+    	inport = pkt['inport']
+    	srcip  = pkt['srcip']        
+    	dstip  = pkt['dstip']        
+    	opcode = pkt['protocol']
 
 	#Se determina si la ip de origen  esta en el diccionario IPPuerto, caso contrario se la agrega.
 	if not srcip in IpPuerto:
@@ -37,8 +37,8 @@ def ejecutarARP(pkt, network, IpPuerto):
 			enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
 					
 	        except:
-				print "Error en el envio de la respuesta ARP"
-	            print pkt
+			print "Error en el envio de la respuesta ARP"
+	            	print pkt
 
 
 #Otro comentario
