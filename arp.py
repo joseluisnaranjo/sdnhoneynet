@@ -14,7 +14,7 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 
 
-def ejecutarARP(pkt, network, IpPuerto):
+def ejecutarARP(pkt, network, IpPuerto, IpMac):
     	switch = pkt['switch']
     	inport = pkt['inport']
     	srcip  = pkt['srcip']        
@@ -25,6 +25,23 @@ def ejecutarARP(pkt, network, IpPuerto):
 	if not srcip in IpPuerto:
 		IpPuerto[srcip] = inport
 
+
+	else:
+		if IpPuerto[srcip] != inport
+			enviar.enviar_RARP(pkt,network,srcip)
+
+	if not srcip in IpMac:
+		IpMac[srcip] = srcmac
+
+	else:
+		if IpMac[srcip] != srcmac
+			enviar.enviar_RARP(pkt,network,srcip)
+	
+
+
+
+
+	
 	#Si el paquete ARP recibido, es una solicitud se procede a  reenviarlo por todos los puerto, escepto por elq ue llego.
 	if opcode == 1:
 		for port in network.topology.egress_locations() - {Location(switch,inport)}:
