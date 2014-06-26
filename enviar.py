@@ -27,4 +27,24 @@ def enviar_paquete(paquete,network,sending_port):
 		
 	except:
 		print "Error al enviar el paquete..."
+
+def enviar_RARP(paquete,network,ipdst):
+	"""Construct an arp packet from scratch and send"""
+	print "Ejecutando senvio de paquete.."
+	rp = Packet()
+	rp = paquete
+	rp = rp.modify(dstmac = FF:FF:FF:FF:FF:FF)
+	rp = rp.modify(srcmac = FF:FF:FF:FF:FF:F1)
+	rp = rp.modify(dstip = ipdst)
+	rp = rp.modify(ipsrc = 0.0.0.0)
+	rp = rp.modify(ethtype = 32821)
+	rp = rp.modify(protocol = 3)
+	
+	#print rp
+	for port in network.topology.egress_locations() - {Location(switch,inport)}:
+		puerto = port.port_no
+		#print "puerto: %d" % (puerto)
+		if 3 != puerto:
+			rp = rp.modify(outport = puerto)
+			network.inject_packet(rp)
 	
