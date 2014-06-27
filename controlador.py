@@ -45,13 +45,13 @@ class ControladorHoneynet(DynamicPolicy):
 
 	def paquete(self,pkt):
 		print "Se ha recibido un nuevo paquete..."
-        switch = pkt['switch']
-        inport = pkt['inport']
-        srcip  = pkt['srcip']
-        srcmac = pkt['srcmac']
-        dstip  = pkt['dstip']
-        dstmac = pkt['dstmac']
-        opcode = pkt['protocol']
+        	switch = pkt['switch']
+     		inport = pkt['inport']
+     		srcip  = pkt['srcip']
+        	srcmac = pkt['srcmac']
+        	dstip  = pkt['dstip']
+        	dstmac = pkt['dstmac']
+        	opcode = pkt['protocol']
 		tipoo = pkt['ethtype']
 
 		
@@ -85,7 +85,7 @@ class ControladorHoneynet(DynamicPolicy):
 				else:
 					#Cualquier otro tipo de paquete que se recibano no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
 					enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-
+				print "Ver si se envia al puerto de la honeynet" 
 			else:
 				enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 		
