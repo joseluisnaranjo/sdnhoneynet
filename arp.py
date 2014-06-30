@@ -20,28 +20,25 @@ def ejecutarARP(pkt, network, IpPuerto, IpMac):
     	srcip  = pkt['srcip']        
     	dstip  = pkt['dstip']        
     	opcode = pkt['protocol']
+	srcmac = pkt['srcmac']
 
 	#Se determina si la ip de origen  esta en el diccionario IPPuerto, caso contrario se la agrega.
 	if not srcip in IpPuerto:
 		IpPuerto[srcip] = inport
+		if not srcip in IpMac:
+			IpMac[srcip] = srcmac
+			ejecutarEnvio(pkt, network, IpPuerto)
 
+		else:
+			if IpMac[srcip] != srcmac
+				enviar.enviar_RARP(pkt,network,srcmac)
 
 	else:
-		if IpPuerto[srcip] != inport
-			enviar.enviar_RARP(pkt,network,srcip)
-
-	if not srcip in IpMac:
-		IpMac[srcip] = srcmac
-
-	else:
-		if IpMac[srcip] != srcmac
-			enviar.enviar_RARP(pkt,network,srcip)
-	
+	ejecutarEnvio(pkt, network, IpPuerto)
 
 
 
-
-	
+def ejecutarEnvio(pkt, network, IpPuerto):
 	#Si el paquete ARP recibido, es una solicitud se procede a  reenviarlo por todos los puerto, escepto por elq ue llego.
 	if opcode == 1:
 		for port in network.topology.egress_locations() - {Location(switch,inport)}:
@@ -53,8 +50,7 @@ def ejecutarARP(pkt, network, IpPuerto, IpMac):
 		try: 
 			enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
 					
-	        except:
+		except:
 			print "Error en el envio de la respuesta ARP"
-	            	print pkt
-			
+		    	print pkt
 #Clase terminada  completamente... Funcionando!!!!
