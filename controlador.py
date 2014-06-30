@@ -24,6 +24,7 @@ class ControladorHoneynet(DynamicPolicy):
 	ListaSolicitudes = []
 	ListaAtacantes = []
 	ListaClientes = []
+	ListaRARP = []
 	
 
 	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
@@ -92,8 +93,18 @@ class ControladorHoneynet(DynamicPolicy):
 		#Se determinara si el paquete recibido, es o no del tipo RARP
 		elif tipoo == 32821:
 			#paquete RARP
-			time.sleep(0.99)
-
+			self.ListaRARP.append(pkt)
+			tiempo = self.config.get("RARP","tiempo")
+			time.sleep(tiempo)
+			if  len(self.ListaRARP) == 2
+				num = 0
+				while (num < 2): 
+					if self.ListaRARP[num]['srcmac'] != self.IpMac[srcip]
+						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+						num = num + 1
+			else:
+				IpMac[srcip] = srcmac
+				
 
 def main():
 	#print "Ejecutando main.."
