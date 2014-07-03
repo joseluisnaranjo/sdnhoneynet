@@ -60,12 +60,12 @@ class ControladorHoneynet(DynamicPolicy):
 		
 		#Se determinara si el paquete recibido, es o no del tipo ARP
 		if  tipoo == 2054:
-			arp.ejecutarARP(pkt,self.network, self.IpPuerto, self.IpMac, self.paqueteARP)
+			arp.ejecutarARP(pkt,self.network, self.IpPuerto, self.IpMac, self.paqueteARP, self.IpMacAtacante)
 
         	#Se determinara si el paquete recibido, es o no del tipo IP
 		elif tipoo == 2048:
 			#A continuacion se hace una comprobacion de la ip y el puerto de origen con los datos obtenidos al hacer el ARP 
-			if self.IpMac[srcip] == srcmac && self.IpPuerto[srcip]==inport:
+			if ((self.IpMac[srcip] == srcmac) and (self.IpPuerto[srcip]==inport)):
 
 				if opcode == 1:
 					#Paquete ICMP
@@ -107,8 +107,8 @@ class ControladorHoneynet(DynamicPolicy):
 				num = 0
 				while (num < longLista):
 					#En la lista de las respuestas RARP buscamos cual es el atacante para enviarlo a la honeynet
-					if self.ListaRARP[num]['srcmac'] != self.IpMac[srcip]
-						IpMacAtacante[srcip] = srcmac
+					if self.ListaRARP[num]['srcmac'] != self.IpMac[srcip]:
+						self.IpMacAtacante[srcip] = srcmac
 						enviar.enviar_paquete(paqueteARP,self.network,self.IpPuerto[dstip])
 					num = num + 1
 			#Si solo llega una respuesta actualizamos el diccionario IpMac y enviamos el paquete original a que se realice el ARP			
