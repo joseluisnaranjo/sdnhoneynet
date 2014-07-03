@@ -33,10 +33,10 @@ def enviar_RARP(paquete,network,srcmac):
 	print "Ejecutando senvio de paquete.."
 	rp = Packet()
 	rp = paquete
-	rp = rp.modify(dstmac = FF:FF:FF:FF:FF:FF)
+	rp = rp.modify(dstmac = "FF:FF:FF:FF:FF:FF")
 	rp = rp.modify(srcmac = srcmac)
-	rp = rp.modify(dstip = 0.0.0.0)
-	rp = rp.modify(srcip = 0.0.0.0)
+	rp = rp.modify(dstip = "0.0.0.0")
+	rp = rp.modify(srcip = "0.0.0.0")
 	rp = rp.modify(ethtype = 32821)
 	rp = rp.modify(protocol = 3)
 	
