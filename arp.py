@@ -15,12 +15,12 @@ from pyretic.lib.query import *
 import controlador
 
 
-def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP):
-    	switch = pkt['switch']
+def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP, IpMacAtacante):
+    	
     	inport = pkt['inport']
     	srcip  = pkt['srcip']        
     	dstip  = pkt['dstip']        
-    	opcode = pkt['protocol']
+
 	srcmac = pkt['srcmac']
 
 	#Se determina si la ip de origen esta en el diccionario IPPuerto
@@ -45,7 +45,7 @@ def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP):
 				enviar.enviar_RARP(pkt,network,srcmac)
 
 		#A continuacion se comprueba si esta en el diccionario de atacantes 
-		elif srcip in IpMacAtacante
+		elif srcip in IpMacAtacante:
 			#Una ves que sabemos que esta en el diccionario de atacantes enviamos a la honeynet
 			ejecutarEnvio(pkt, network, IpPuerto)
 		
@@ -58,6 +58,10 @@ def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP):
 
 
 def ejecutarEnvio(pkt, network, IpPuerto):
+	switch = pkt['switch']
+    	opcode = pkt['protocol']
+	inport = pkt['inport']
+	dstip  = pkt['dstip']
 	#Si el paquete ARP recibido, es una solicitud se procede a  reenviarlo por todos los puerto, escepto por elq ue llego.
 	if opcode == 1:
 		for port in network.topology.egress_locations() - {Location(switch,inport)}:
