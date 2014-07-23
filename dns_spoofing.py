@@ -66,8 +66,8 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 				enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
 			else:
 				num = 0
-				while(num < 2)
-					if ListaDNS[num]['srcip'] != "8.8.8.8"
+				while(num < 2):
+					if ListaDNS[num]['srcip'] != IPAddr('8.8.8.8'):
 						enviar.enviar_paquete(ListaDNS[num],network,IpPuerto[dstip])
 					num = num + 0	
 		else:
