@@ -28,13 +28,13 @@ def enviar_paquete(paquete,network,sending_port):
 	except:
 		print "Error al enviar el paquete..."
 
-def enviar_RARP(paquete,network,srcmac):
+def enviar_RARP(paquete,network):
 	"""Construct an arp packet from scratch and send"""
 	print "Ejecutando senvio de paquete.."
 	rp = Packet()
 	rp = paquete
 	rp = rp.modify(dstmac = "FF:FF:FF:FF:FF:FF")
-	rp = rp.modify(srcmac = srcmac)
+	
 	rp = rp.modify(dstip = "0.0.0.0")
 	rp = rp.modify(srcip = "0.0.0.0")
 	rp = rp.modify(ethtype = 32821)
