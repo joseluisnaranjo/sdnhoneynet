@@ -17,8 +17,8 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 from ConfigParser import ConfigParser
 import os 
-import time
-
+import time/home/mininet/pyretic
+/home/mininet/pyretic
 class ControladorHoneynet(DynamicPolicy):
 	config = ConfigParser()
 	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
@@ -30,7 +30,7 @@ class ControladorHoneynet(DynamicPolicy):
 	paqueteARP = Packet()
 	identificador = ""
 	lenURL = 0
-	
+	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 
 	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
 
@@ -55,65 +55,75 @@ class ControladorHoneynet(DynamicPolicy):
         	switch = pkt['switch']
      		inport = pkt['inport']
 	     	srcip  = pkt['srcip']
-			srcmac = pkt['srcmac']
-			dstip = pkt['dstip']
-			dstmac = pkt['dstmac']
-			opcode = pkt['protocol']
-			tipoo = pkt['ethtype']
+		srcmac = pkt['srcmac']
+		dstip = pkt['dstip']
+		dstmac = pkt['dstmac']
+		opcode = pkt['protocol']
+		tipoo = pkt['ethtype']
 			 
 
 		
 		#Se determinara si el paquete recibido, es o no del tipo ARP
 		if  tipoo == 2054:
-			arp.ejecutarARP(pkt,self.network, self.IpPuerto, self.IpMac, self.paqueteARP, self.IpMacAtacante)
+			arp.ejecutarARP(pkt,self.network, self.IpPuerto,self.puertoHoneynet, self.IpMac, self.paqueteARP, self.IpMacAtacante)
 
         	#Se determinara si el paquete recibido, es o no del tipo IP
 		elif tipoo == 2048:
-			#A continuacion se hace una comprobacion de la ip y el puerto de origen con los datos obtenidos al hacer el ARP 
-			if ((self.IpMac[srcip] == srcmac) and (self.IpPuerto[srcip]==inport)):
+			try:
+				#A continuacion se hace una comprobacion de la ip y el puerto de origen con los datos obtenidos al hacer el ARP
+				#El siguiente lazo if comprueba si se trata de un ip spoofing  
+				if ((self.IpMac[srcip] == srcmac) and (self.IpPuerto[srcip]==inport)):
 
-				if opcode == 1:
-					#Paquete ICMP
-					print "Se ha recibido un paquete ICMP"
-					#con el comando ping y un grep vamos a obtener la direccion de broadcasr del interface de red
-					ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
-					broadacast_IP = os.system(ipBcast)
-					#Se hace una comparacion con la direccion de destino si es la de broadcast para decidir a donde enviar el paquete 
-					if broadacast_IP == dstip:
-						#Destino la honeynet
-						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+					if opcode == 1:
+						#Paquete ICMP
+						print "Se ha recibido un paquete ICMP"
+						#con el comando ping y un grep vamos a obtener la direccion de broadcasr del interface de red
+						ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
+						broadacast_IP = os.system(ipBcast)
+						#Se hace una comparacion con la direccion de destino si es la de broadcast para decidir a donde enviar el paquete 
+						#El siguiente lazo if comprueba si se trata de un ataque smurf
+						if broadacast_IP == dstip:
+							#Destino la honeynet
+							enviar.enviar_paquete(pkt,self.network,self.puertoHoneynet)
+							print "ATAQUE SMURF"
+						else:
+							#Destino la red real
+							enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+							print "BUENO"
+
+					elif opcode == 6:
+						#Paquete TCP
+						syn_flood.syn_flood(pkt,self.network, self.IpPuerto)
+					
+					
+					
+					elif opcode == 17:
+					
+						#A continuacion de extrae el payload codificado (paquete original) del pkt OpenFlow
+						of_payload_code = pkt['raw']
+						#A continucaion se codifica en hexadecimal dicho payload
+						of_payload = of_payload_code.encode("hex")
+						#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack 
+						dstport = of_payload[74:78]
+						if (dstport == 0053):
+							dns_spoofing.dns_spoofing(pkt,self.network,self.IpPuerto,self.identificador,self.lenURL,self.ListaDNS)
+						else:		
+							enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+							
+							
+							
 					else:
-						#Destino la red real
+						#Cualquier otro tipo de paquete que se reciba no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
 						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-
-				elif opcode == 6:
-					#Paquete TCP
-					syn_flood.syn_flood(pkt,self.network, self.IpPuerto)
-					
-					
-					
-				elif opcode == 17:
-					
-					#A continuacion de extrae el payload codificado (paquete original) del pkt OpenFlow
-					of_payload_code = pkt['raw']
-					#A continucaion se codifica en hexadecimal dicho payload
-					of_payload = of_payload_code.encode("hex")
-					#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack 
-					dstport = of_payload[74:78]
-					if (dstport == 0053):
-						dns_spoofing.dns_spoofing(pkt,self.network,self.IpPuerto,self.identificador,self.lenURL,self.ListaDNS)
-					else:		
-						enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-							
-							
-							
+					print "Ver si se envia al puerto de la honeynet" 
 				else:
-					#Cualquier otro tipo de paquete que se reciba no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
-					enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-				print "Ver si se envia al puerto de la honeynet" 
-			else:
-				enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+					enviar_paquete(pkt,self.network,self.puertoHoneynet)
 				
+
+			except:	
+
+				print "Se debe hacer un ARP"		
+			
 			
 		
 		#Se determinara si el paquete recibido, es o no del tipo RARP
@@ -133,6 +143,7 @@ class ControladorHoneynet(DynamicPolicy):
 					#En la lista de las respuestas RARP buscamos cual es el atacante para enviarlo a la honeynet
 					if self.ListaRARP[num]['srcmac'] != self.IpMac[srcip]:
 						self.IpMacAtacante[srcip] = srcmac
+						self.IpMac.remove(srcip)
 						enviar.enviar_paquete(paqueteARP,self.network,self.IpPuerto[dstip])
 					num = num + 1
 			#Si solo llega una respuesta actualizamos el diccionario IpMac y enviamos el paquete original a que se realice el ARP			
