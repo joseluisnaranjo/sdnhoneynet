@@ -17,6 +17,9 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 from ConfigParser import ConfigParser
 import os 
+import binascii
+import socket
+
 
 class ControladorHoneynet(DynamicPolicy):
 	config = ConfigParser()
@@ -59,23 +62,29 @@ class ControladorHoneynet(DynamicPolicy):
 		dstmac = pkt['dstmac']
 		opcode = pkt['protocol']
 		tipoo = pkt['ethtype']
+		
 			 
 
 		
-		#Se determinara si el paquete recibido, es o no del tipo ARP
+		#Se determinara si el paquete recibido, es o no del tipo ARP"
 		if  tipoo == 2054:
+			print "paquete ARP "
+			a= pkt['raw']
+			print binascii.hexlify(socket.inet_aton(str(srcip)))
 			arp.ejecutarARP(pkt,self.network, self.IpPuerto,self.puertoHoneynet, self.IpMac, self.paqueteARP, self.IpMacAtacante)
 
-        	#Se determinara si el paquete recibido, es o no del tipo IP
+        		#Se determinara si el paquete recibido, es o no del tipo IP"
 		elif tipoo == 2048:
+			print "paquete IP "
 			try:
 				#A continuacion se hace una comprobacion de la ip y el puerto de origen con los datos obtenidos al hacer el ARP
-				#El siguiente lazo if comprueba si se trata de un ip spoofing  
+				#El siguiente lazo if comprueba si se trata de un ip spoofing" 
+ 
 				if ((self.IpMac[srcip] == srcmac) and (self.IpPuerto[srcip]==inport)):
-
+					print "NO se trata de un IP SPOOFING"
 					if opcode == 1:
-						#Paquete ICMP
-						print "Se ha recibido un paquete ICMP"
+						print "Paquete ICMP"
+						
 						#con el comando ping y un grep vamos a obtener la direccion de broadcasr del interface de red
 						ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
 						broadacast_IP = os.system(ipBcast)
@@ -91,13 +100,13 @@ class ControladorHoneynet(DynamicPolicy):
 							print "BUENO"
 
 					elif opcode == 6:
-						#Paquete TCP
+						print "Paquete TCP"
 						syn_flood.syn_flood(pkt,self.network, self.IpPuerto,self.ListaAtacantes,self.ListaClientes,self.ListaSolicitudes)
 					
 					
 					# Si corresponde a un paquete UDP
 					elif opcode == 17:
-					
+						print "paquete UDP "
 						#A continuacion de extrae el payload codificado (paquete original) del pkt OpenFlow
 						of_payload_code = pkt['raw']
 						#A continucaion se codifica en hexadecimal dicho payload
@@ -112,22 +121,25 @@ class ControladorHoneynet(DynamicPolicy):
 							
 							
 					else:
+						print "Otro tipo de paquete IP"
 						#Cualquier otro tipo de paquete que se reciba no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
 						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-					print "Ver si se envia al puerto de la honeynet" 
+					 
 				else:
+					print "Se trata de un IP SPOOFING"
 					enviar_paquete(pkt,self.network,self.puertoHoneynet)
 				
 
 			except:	
-				self.IpMac[srcip] = srcmac
-				print "Se debe hacer un ARP"		
+				print "Error con el paquete IP recibido...(diccionarios vacios)"
+				#enviar.enviar_ARP(pkt, self.network)
+						
 			
 			
 		
 		#Se determinara si el paquete recibido, es o no del tipo RARP
 		elif tipoo == 32821:
-			#paquete RARP
+			print "paquete RARP "
 			#Lista en el que se guardaran todas las respuestas RARP
 			self.ListaRARP.append(pkt)
 			#Tiempo que esperara a que lleguen todas las respuestas RARP
@@ -147,8 +159,7 @@ class ControladorHoneynet(DynamicPolicy):
 					num = num + 1
 			#Si solo llega una respuesta actualizamos el diccionario IpMac y enviamos el paquete original a que se realice el ARP			
 			else:
-				IpPuerto["10.0.0.1"] = 1
-				IpPuerto["10.0.0.2"] = 3
+
 				arp.ejecutarARP(paqueteARP,self.network, self.IpPuerto, self.IpMac, self.paqueteARP)
 				
 

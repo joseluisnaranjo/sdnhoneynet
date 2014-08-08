@@ -1,3 +1,4 @@
+
 ###################################################################################
 #                        ESCUELA POLITECNICA NACIONAL                             #
 # ------------------------------------------------------------------------------  #
@@ -25,7 +26,7 @@ def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacA
 	#Se determina si la ip de origen esta en el diccionario IPPuerto
 	#El primer lazo if ayuda unicamente a llenar el diccionario IpPuerto
 	if srcip in IpPuerto:
-		#Si es que ya existe se envia directamente
+		#Si es que ya existe se envia directamente"
 		tipoARP(pkt, network, IpPuerto[dstip])
 
 	#Si no se encuentra en el diccionario se lo ingresa 
@@ -56,8 +57,7 @@ def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacA
 			try:
 				tipoARP(pkt, network, IpPuerto[dstip])
 			except:
-				tipoARP(pkt, network, puertoHoneynet)
-
+				tipoARP(pkt, network, 0)
 
 
 def tipoARP(pkt, network, puerto):

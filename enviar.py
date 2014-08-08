@@ -21,7 +21,6 @@ def enviar_paquete(paquete,network,sending_port):
 		rp = Packet()
 		rp = paquete
 		rp = rp.modify(outport = sending_port)
-		print rp
 		network.inject_packet(rp)
 		print "Paquete enviado exitosamente!!..."
 		
@@ -39,6 +38,18 @@ def enviar_RARP(paquete,network):
 	rp = rp.modify(srcip = "0.0.0.0")
 	rp = rp.modify(ethtype = 32821)
 	rp = rp.modify(protocol = 3)
+
+def enviar_ARP(paquete,network):
+	"""Construct an arp packet from scratch and send"""
+	print "Ejecutando senvio de paquete.."
+	rp = Packet()
+
+	rp = rp.modify(dstmac = "00:00:00:00:00:00")
+	rp = rp.modify(srcmac = paquete['srcmac'])
+	rp = rp.modify(dstip = paquete['dstip'])
+	rp = rp.modify(srcip = paquete['srcip'])
+	rp = rp.modify(ethtype = 2054)
+	rp = rp.modify(protocol = 1)
 	
 	#print rp
 	for port in network.topology.egress_locations() - {Location(switch,inport)}:
@@ -53,7 +64,7 @@ def enviar_DNS(paquete,network):
 		rp = Packet()
 		rp = paquete
 		rp = rp.modify(dstip = "8.8.8.8")
-		print rp
+		#print rp
 		network.inject_packet(rp)
 		print "Paquete enviado exitosamente!!..."
 		
