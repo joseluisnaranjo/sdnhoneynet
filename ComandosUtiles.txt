@@ -34,6 +34,23 @@ Como configurar el openvswitch
   Espicificar el controlador
     ovs-vsctl set-controller br-int tcp:192.168.0.250:6633
   sudo service openvswitch-controller stop
+  
+  
+Elimir tablas arp:
+  windows:
+    para ver las tablas arp: arp -a
+    para agregar una entrada arp: ARP -s 10.0.0.80 00-AA-00-4F-2A-9C
+    para borrar las tabals arp:  netsh interface ip delete arpcach
+    
+  Linux:
+    para ver las tablas arp: arp -n      ó:   ip neigh
+    para agregar una entrada arp: ARP -s 10.0.0.80 00-AA-00-4F-2A-9C
+    para borrar las tabals arp:  
+      por interfaz: sudo ip neigh flush dev eth0
+      por prefijo de red: sudo ip neigh flush to 10 ( borra todas alas IP que empiezan con 10)
+      por estado: sudo ip neigh flush nud reachable
+    
+  
 Enlaces Utiles:
 
   Arp Spoofing: http://linuxgnublog.org/envenamiento-de-las-tablas-arp-arp-spoofing
