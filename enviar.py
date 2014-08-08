@@ -61,7 +61,7 @@ def enviar_ARP(paquete,network):
 	switchh = paquete['switch']
 	portin = paquete['inport']
 	rp = rp.modify(dstmac = "FF:FF:FF:FF:FF:FF")
-	rp = rp.modify(srcmac = mac)
+	rp = rp.modify(srcmac = macsrc)
 	rp = rp.modify(dstip = ipdst)
 	rp = rp.modify(srcip = ipsrc)
 	rp = rp.modify(ethtype = 2054)
