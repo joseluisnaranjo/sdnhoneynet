@@ -20,8 +20,17 @@ sudo ovs-vsctl add-br s1
 sudo ovs-vsctl add-port s1 eth1
 sudo ovs-vsctl add-port s1 eth2
 sudo ovs-vsctl add-port s1 eth3
-sudo ovs-vsctl set-controller s1 tcp:192.168.0.121:6633 ptcp:6634
+sudo ovs-vsctl set-controller s1 tcp:192.168.0.118:6633 ptcp:6634
 sudo ovs-vsctl set bridge s1 other-config:datapath-id=0000000000000001
+
+location:      	1	2	None
+source:        	10.0.0.2	00:00:00:00:00:02
+dest:          	10.0.0.1	00:00:00:00:00:01
+md5:           ef4acd3a8a551d0ddb2c726251ebc923
+ethtype:       	2054
+header_len:    	14
+payload_len:   	28
+protocol:      	1
 
 
 http://ricardoperez.ingenieriaupoli.net/2013/05/20/hackeando-redes-mediante-el-protocolo-ipv4/
