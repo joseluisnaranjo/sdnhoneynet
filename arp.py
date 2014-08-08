@@ -27,7 +27,10 @@ def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacA
 	#El primer lazo if ayuda unicamente a llenar el diccionario IpPuerto
 	if srcip in IpPuerto:
 		#Si es que ya existe se envia directamente"
-		tipoARP(pkt, network, IpPuerto[dstip])
+		try:
+			tipoARP(pkt, network, IpPuerto[dstip])
+		except:
+			enviar.enviar_ARP(pkt, network)
 
 	#Si no se encuentra en el diccionario se lo ingresa 
 	else:
