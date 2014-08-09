@@ -14,7 +14,7 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 import socket
 import binascii
-
+from ConfigParser import ConfigParser
 
 def enviar_paquete(paquete,network,sending_port):
 	try:
@@ -30,6 +30,9 @@ def enviar_paquete(paquete,network,sending_port):
 		print "Error al enviar el paquete..."
 
 def enviar_RARP(paquete,network):
+	config = ConfigParser()
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion 
+	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	"""Construct an arp packet from scratch and send"""
 	print "Ejecutando senvio de paquete.."
 	switchh = paquete['switch']
@@ -45,11 +48,14 @@ def enviar_RARP(paquete,network):
 	for port in network.topology.egress_locations() - {Location(switchh,portin)}:
 		puerto = port.port_no
 		#print "puerto: %d" % (puerto)
-		if portin != puerto:
+		if ((portin != puerto) and (puertoHoneynet != puerto)):
 			rp = rp.modify(outport = puerto)
 			network.inject_packet(rp)
 			
 def enviar_ARP(paquete,network):
+	config = ConfigParser()
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion 
+	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	"""Construct an arp packet from scratch and send"""
 	print "Ejecutando senvio de paquete.."
 	rp = Packet()
@@ -76,7 +82,7 @@ def enviar_ARP(paquete,network):
 	for port in network.topology.egress_locations() - {Location(switchh,portin)}:
 		puerto = port.port_no
 		#print "puerto: %d" % (puerto)
-		if portin != puerto:
+		if ((portin != puerto) and (puertoHoneynet != puerto)):
 			rp = rp.modify(outport = puerto)
 			network.inject_packet(rp)
 			
