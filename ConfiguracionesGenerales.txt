@@ -47,3 +47,7 @@ Configuracion estatica de una interfaz de red en Linux
 	Finalmente, se debe reinicial el pc con:
 		sudo shutdown -P now  ó
 		sudo reboot -P now 
+	Para cambiar la direccion MAC
+		ifconfig eth0 down
+		ifconfig eth0 hw ether 02:01:02:03:04:08
+		ifconfig eth0 up
