@@ -20,7 +20,7 @@ sudo ovs-vsctl add-br s1
 sudo ovs-vsctl add-port s1 eth1
 sudo ovs-vsctl add-port s1 eth2
 sudo ovs-vsctl add-port s1 eth3
-sudo ovs-vsctl set-controller s1 tcp:192.168.0.118:6633 ptcp:6634
+sudo ovs-vsctl set-controller s1 tcp:192.168.0.100:6633 ptcp:6634
 sudo ovs-vsctl set bridge s1 other-config:datapath-id=0000000000000001
 
 location:      	1	2	None
