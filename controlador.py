@@ -85,10 +85,11 @@ class ControladorHoneynet(DynamicPolicy):
 						
 						#con el comando ping y un grep vamos a obtener la direccion de broadcasr del interface de red
 						ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
-						broadacast_IP = os.system(ipBcast)
+						broadcast_IP = os.system(ipBcast)
 						#Se hace una comparacion con la direccion de destino si es la de broadcast para decidir a donde enviar el paquete 
 						#El siguiente lazo if comprueba si se trata de un ataque smurf
-						if broadacast_IP == dstip:
+						print broadcast_IP
+						if broadcast_IP == dstip:
 							#Destino la honeynet
 							enviar.enviar_paquete(pkt,self.network,self.puertoHoneynet)
 							print "ATAQUE SMURF"
