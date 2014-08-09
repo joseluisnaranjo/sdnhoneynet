@@ -14,15 +14,19 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
 import controlador
+from ConfigParser import ConfigParser
 
 
 def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacAtacante):
-    	
+	config = ConfigParser()
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion    
+	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	inport = pkt['inport']
 	srcip  = pkt['srcip']        
 	dstip  = pkt['dstip']        
 	srcmac = pkt['srcmac']
 
+	
 	#Se determina si la ip de origen esta en el diccionario IPPuerto
 	#El primer lazo if ayuda unicamente a llenar el diccionario IpPuerto
 	if srcip in IpPuerto:
@@ -64,15 +68,19 @@ def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacA
 
 
 def tipoARP(pkt, network, puerto):
+	config = ConfigParser()
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion    
+	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	switch = pkt['switch']
 	opcode = pkt['protocol']
 	inport = pkt['inport']
 	dstip  = pkt['dstip']
 	#Si el paquete ARP recibido, es una solicitud se procede a  reenviarlo por todos los puerto, escepto por el que llego.
 	if opcode == 1:
+
 		for port in network.topology.egress_locations() - {Location(switch,inport)}:
 			puerto = port.port_no					
-			if inport != puerto:
+			if ((inport != puerto) and (puertoHoneynet != puerto)):
 				enviar.enviar_paquete(pkt,network,puerto)
 	# Si el paquete recibido es una respuesta ARP se la enviara unicamente por el puerto en el quese encuentre la Ip destino.
 	elif opcode == 2:			
