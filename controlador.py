@@ -43,6 +43,7 @@ class ControladorHoneynet(DynamicPolicy):
 		self.IpPuerto = {}
 		self.IpMac = {}
 		self.IpMacAtacante = {}
+
 		self.query.register_callback(self.paquete)
 		self.network = None
 		super(ControladorHoneynet,self).__init__(self.query)
@@ -69,7 +70,7 @@ class ControladorHoneynet(DynamicPolicy):
 		#Se determinara si el paquete recibido, es o no del tipo ARP"
 		if  tipoo == 2054:
 			print "paquete ARP "
-			arp.ejecutarARP(pkt,self.network, self.IpPuerto,self.puertoHoneynet, self.IpMac, self.paqueteARP, self.IpMacAtacante)
+			arp.ejecutarARP(pkt,self.network, self.IpPuerto,int(self.puertoHoneynet), self.IpMac, self.paqueteARP, self.IpMacAtacante)
 			
 		#Se determinara si el paquete recibido, es o no del tipo IP"
 		elif tipoo == 2048:
@@ -91,7 +92,7 @@ class ControladorHoneynet(DynamicPolicy):
 						print broadcast_IP
 						if broadcast_IP == dstip:
 							#Destino la honeynet
-							enviar.enviar_paquete(pkt,self.network,self.puertoHoneynet)
+							enviar.enviar_paquete(pkt,self.network,int(self.puertoHoneynet))
 							print "ATAQUE SMURF"
 						else:
 							#Destino la red real
@@ -126,7 +127,7 @@ class ControladorHoneynet(DynamicPolicy):
 					 
 				else:
 					print "Se trata de un IP SPOOFING"
-					enviar_paquete(pkt,self.network,self.puertoHoneynet)
+					enviar_paquete(pkt,self.network,int(self.puertoHoneynet))
 				
 
 			except:	
