@@ -50,6 +50,30 @@ Elimir tablas arp:
       por prefijo de red: sudo ip neigh flush to 10 ( borra todas alas IP que empiezan con 10)
       por estado: sudo ip neigh flush nud reachable
     
+    
+    
+Instalacion de entorno de desarrollo:
+  Agregamos el a ñadidor de repositorios:
+    sudo apt-get install software-properties-common python-software-properties
+
+  Agregamso los repositorios necesarios:
+    sudo apt-add-repository ppa:ninja-ide-developers/ninja-ide-stable (Stable updates)
+(OR)
+    sudo apt-add-repository ppa:ninja-ide-developers/daily (Daily updates)
+
+  sudo apt-get update
+  sudo apt-get install ninja-ide
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
   
 Enlaces Utiles:
 

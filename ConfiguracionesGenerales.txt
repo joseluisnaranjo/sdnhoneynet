@@ -26,8 +26,18 @@ Configuracion maquina virtual Pyretic
 			sudo ssh -X mininet@192.168.03.100,  donde la IP luego de @ es la del controlador
 			se deben poner las ocntraseñas pedidas.
 			
-	   
-	 
+Configuracion de pyretic para lanzar mi aplicaion por defecto:
+	 Se debe digitar el comando :
+	 	sudo gedit pyretic.py
+	 		Dentro del metodo;  def parseArgs():
+	 		la linea 88: op.set_defaults(frontend_only=False, mode='i')
+	 		antes de return del mismo metodo: 
+	 			args = ['sdnhoneynet.controlador']
+	 			kwargs_to_pass = {}
+	 		Dentro del metodo main():
+	 		antes del primer if:
+	 			op='-m'
+	 			options.mode='i'
 		
 Configuracion estatica de una interfaz de red en Linux
 
