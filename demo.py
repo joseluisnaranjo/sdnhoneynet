@@ -19,6 +19,7 @@ from ConfigParser import ConfigParser
 import os
 import binascii
 import socket
+import andresIP
 
 
 class ControladorHoneynet(DynamicPolicy):
@@ -32,6 +33,8 @@ class ControladorHoneynet(DynamicPolicy):
 	paqueteARP = Packet()
 	identificador = ""
 	lenURL = 0
+	IpPuerto = {}
+	IpMac = {}
 	num = 0
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 
@@ -41,8 +44,7 @@ class ControladorHoneynet(DynamicPolicy):
 		print "Se iniciara el constructor de la clase.."
 		self.query = packets()
 		self.remotes_ip = {}
-		self.IpPuerto = {}
-		self.IpMac = {}
+
 		self.IpMacAtacante = {}
 
 		self.query.register_callback(self.paquete)
@@ -57,56 +59,70 @@ class ControladorHoneynet(DynamicPolicy):
 	def paquete(self,pkt):
 
             inport = pkt['inport']
-            if self.num < 1000:
+            if self.num < 100:
                 if inport != int(self.puertoHoneynet):
                     a = self.network
-                    b = self.puertoHoneynet
-                    c = self.num
-                    ejecucion(pkt, a,b, c)
+                    b = int(self.puertoHoneynet)
+                    #c = self.num
+                    ejecucion(pkt, a,b, self.num)
+		    print "se a recibido el paquete numero = " + str(self.num)
             else:
-                    self.puertoHoneynet = 1
-                    ejecucion(pkt, a, b, c)
+		    a = self.network                    
+                    b = 1
+                    ejecucion(pkt, a, b, self.num)
+		    print "se a recibido el paquete numero = " + str(self.num)
 
 def main():
 	#print "Ejecutando main.."
 	return ControladorHoneynet()
 
 def ejecucion(pkt, network , puertoHoneynet, num):
-            print "se a recibido el paquete numero = " + str(num)
-            switch = pkt['switch']
-            inport = pkt['inport']
-            srcip  = pkt['srcip']
-            srcmac = pkt['srcmac']
-            dstip = pkt['dstip']
-            dstmac = pkt['dstmac']
-            opcode = pkt['protocol']
-            tipoo = pkt['ethtype']
+	    control = ControladorHoneynet  
+            #print "se a recibido el paquete numero = " + str(num)
+            try:
+		switch = pkt['switch']
+            	inport = pkt['inport']
+            	tipoo = pkt['ethtype']
+            	srcmac = pkt['srcmac']
+            	dstmac = pkt['dstmac']
+            	opcode = pkt['protocol']
+            	dstip = pkt['dstip']
+		srcip  = pkt['srcip']
+            except:
+		print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
             if  tipoo == 2054:
 				print "paquete arp"
-				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch,int(puertoHoneynet))}:
+				if not srcip in control.IpPuerto:
+					control.IpPuerto[srcip] = inport
+
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
 					puerto = port.port_no
 					print "puerto entrada = " + str(inport)
 					print "puerto switch = " + str(puerto)
 					enviar.enviar_paquete(pkt,network,puerto)
 					print "****************************************"
-				num=num+1
+				control.num=control.num+1
 
             elif tipoo == 2048:
 				print "paquete IP "
-				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch,int(puertoHoneynet))}:
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
 					puerto = port.port_no
 					print "puerto entrada = " + str(inport)
 					print "puerto switch = " + str(puerto)
-					enviar.enviar_paquete(pkt,network,puerto)
+					#enviar.enviar_paquete(pkt,network,puerto)
+					Listas=[control.ListaSolicitudes,control.ListaAtacantes,control.ListaClientes]
+					andresIP.paqueteIP(pkt, network, control.IpPuerto,control.IpMac,Listas,control.puertoHoneynet)
 					print "//////////////////////////////////////"
-				num = num + 1
+				ControladorHoneynet.num=ControladorHoneynet.num+1
             else:
 				print "Paquetes desconocidos "
-				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch,int(self.puertoHoneynet))}:
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
 					puerto = port.port_no
 					print "puerto entrada = " + str(inport)
 					print "puerto switch = " + str(puerto)
 					enviar.enviar_paquete(pkt,network,puerto)
-					print "---------------------------------"
+					print "???????????????????????????????????????????????"
 
 				num=num+1
+
