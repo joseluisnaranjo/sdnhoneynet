@@ -45,7 +45,7 @@ def enviar_RARP(paquete,network):
 	rp = rp.modify(ethtype = 32821)
 	rp = rp.modify(protocol = 3)
 	#print rp
-	for port in network.topology.egress_locations() - {Location(switchh,portin)} - {Location(switch,int(puertoHoneynet))}:
+	for port in network.topology.egress_locations() - {Location(switchh,portin)} - {Location(switchh,int(puertoHoneynet))}:
 		puerto = port.port_no
 		rp = rp.modify(outport = puerto)
 		network.inject_packet(rp)
@@ -77,7 +77,7 @@ def enviar_ARP(paquete,network):
 	a = "FFFFFFFFFFFF" + hexMAC(str(macsrc)) + "08060001080006040001" + hexMAC(str(macsrc)) + hexipsrc + "000000000000" + hexipdst
 	rp = rp.modify(raw = binascii.unhexlify(a))
 	#print rp
-	for port in network.topology.egress_locations() - {Location(switchh,portin)} - {Location(switch,int(puertoHoneynet))}:
+	for port in network.topology.egress_locations() - {Location(switchh,portin)} - {Location(switchh,int(puertoHoneynet))}:
 		puerto = port.port_no
 		rp = rp.modify(outport = puerto)
 		network.inject_packet(rp)
