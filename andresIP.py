@@ -19,6 +19,7 @@ from ConfigParser import ConfigParser
 import os
 import binascii
 import socket
+import syn_flood_andres
 
 
 
@@ -27,9 +28,10 @@ def paqueteIP(pkt, network, IpPuerto,IpMac, Listas, puertoHoneynet):
 	srcmac = pkt['srcmac']
 	switch = pkt['switch']
 	inport = pkt['inport']
+
 	if srcip in IpMac:
 		if IpMac[srcip] == srcmac:
-			syn_flood.syn_flood(pkt, network, IpPuerto, IpMac, Listas, puertoHoneynet)
+			syn_flood_andres.syn_flood(pkt, network, IpPuerto, IpMac, Listas)
 		else:
 			print "Cambio la MAC"
 	else:
