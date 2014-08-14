@@ -17,13 +17,22 @@ import binascii
 from ConfigParser import ConfigParser
 
 def enviar_paquete(paquete,network,sending_port):
+	config = ConfigParser()
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion 
+	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
+	puertoLAN = config.get("PUERTOS","puertoLAN")
+	inport = pkt['inport']
+	outport = pkt['outport']
+
+	 	
 	try:
 		"""Construct an arp packet from scratch and send"""
 		print "Ejecutando senvio de paquete.."
 		rp = Packet()
 		rp = paquete
 		rp = rp.modify(outport = sending_port)
-		network.inject_packet(rp)
+		if (((inport != int(puertoLAN)) or (outport != int(puertoHoneynet))) and ((inport != int(puertoHoneynet)) or (outport != int(puertoLAN)))):		
+			network.inject_packet(rp)
 		print "Paquete enviado exitosamente!!..."
 		
 	except:
