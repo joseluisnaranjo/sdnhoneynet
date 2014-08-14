@@ -43,7 +43,6 @@ class ControladorHoneynet(DynamicPolicy):
 		self.IpPuerto = {}
 		self.IpMac = {}
 		self.IpMacAtacante = {}
-
 		self.query.register_callback(self.paquete)
 		self.network = None
 		super(ControladorHoneynet,self).__init__(self.query)
@@ -55,17 +54,18 @@ class ControladorHoneynet(DynamicPolicy):
 
 	def paquete(self,pkt):
 		print "Se ha recibido un nuevo paquete..."
-		switch = pkt['switch']
-		inport = pkt['inport']
-		srcip  = pkt['srcip']
-		srcmac = pkt['srcmac']
-		dstip = pkt['dstip']
-		dstmac = pkt['dstmac']
-		opcode = pkt['protocol']
-		tipoo = pkt['ethtype']
-		
-			 
-
+		try:
+			switch = pkt['switch']
+			inport = pkt['inport']
+			srcmac = pkt['srcmac']
+			dstmac = pkt['dstmac']
+			tipoo = pkt['ethtype']
+			opcode = pkt['protocol']
+			srcip  = pkt['srcip']
+			dstip = pkt['dstip']
+		except:
+			print "%%%%%%%%%%%%%%%%%%%%%%%%%%"
+			
 		
 		#Se determinara si el paquete recibido, es o no del tipo ARP"
 		if  tipoo == 2054:
@@ -101,8 +101,7 @@ class ControladorHoneynet(DynamicPolicy):
 
 					elif opcode == 6:
 						print "Paquete TCP"
-						syn_flood.syn_flood(pkt,self.network, self.IpPuerto,self.ListaAtacantes,self.ListaClientes,self.ListaSolicitudes)
-					
+						syn_flood.syn_flood(pkt,self.network, self.IpPuerto, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes)
 					
 					# Si corresponde a un paquete UDP
 					elif opcode == 17:
@@ -114,7 +113,7 @@ class ControladorHoneynet(DynamicPolicy):
 						#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack 
 						dstport = of_payload[74:78]
 						if (dstport == 0053):
-							dns_spoofing.dns_spoofing(pkt,self.network,self.IpPuerto,self.identificador,self.lenURL,self.ListaDNS)
+							dns_spoofing.dns_spoofing(pkt, self.network, self.IpPuerto, self.identificador, self.lenURL, self.ListaDNS)
 						else:		
 							enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 							
