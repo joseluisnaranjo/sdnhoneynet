@@ -131,5 +131,5 @@ def payload(pkt,num1,num2):
 	#A continucaion se codifica en hexadecimal dicho payload
 	of_payload = of_payload_code.encode("hex")
 	#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack  
-	return of_payload[num1:num2]			
+	return of_payload[num1:num2]				
 		
