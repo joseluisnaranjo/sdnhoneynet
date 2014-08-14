@@ -15,11 +15,9 @@ from pyretic.lib.query import *
 from ConfigParser import ConfigParser
 
 
-def syn_flood(pkt, network, IpPuerto, IpMac, Listas, puertoHoneynet):
+def syn_flood(pkt, network, IpPuerto, IpMac, Listas):
 
-	ListaAtacantes = Listas[0]
-	ListaClientes = Listas[1]
-	ListaSolicitudes = Listas[2]
+
 	#paquete TCP
 	print "Se ha recibido un paquete TCP"
 	tcp_flags = payload(pkt,94,96)
@@ -30,16 +28,19 @@ def syn_flood(pkt, network, IpPuerto, IpMac, Listas, puertoHoneynet):
 	#Si el paquete corresponde a una peticion SSL
 	if (dstport == 0443):
 		print ssl_flags
-		comprobarFlags(pkt,network,IpPuerto,ssl_flags,"01","LL")
+		comprobarFlags(pkt,network,IpPuerto,ssl_flags,"01","LL",Listas)
 	elif (srcport == 0443):
-		comprobarFlags(pkt,network,IpPuerto,ssl_datos,"LL","23")
+		comprobarFlags(pkt,network,IpPuerto,ssl_datos,"LL","23",Listas)
 	else:
 		print tcp_flags
-		comprobarFlags(pkt,network,IpPuerto,tcp_flags,"02","10")
+		comprobarFlags(pkt,network,IpPuerto,tcp_flags,"02","10",Listas)
 	
 	
 	
-def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):	
+def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal,Listas):
+	ListaAtacantes = Listas[0]
+	ListaClientes = Listas[1]
+	ListaSolicitudes = Listas[2]	
 	config = ConfigParser()
 	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
@@ -80,13 +81,21 @@ def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):
 
 				#A continuacion se verifica que la direccion IP origen del segmento TCP recibido se encuentre en la lista de Clientes lejitimos
 				elif srcip in ListaClientes:
-					enviar.enviar_paquete(pkt,network,IpPuerto[dstip])									
+					try:
+						#Cualquier otra bandera que se envia no se la analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
+						enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
+					except:
+						print "Ip erronea"									
 
 				else:	
 					#Debido a que no estaba en al lista de clientes lejitimos, se procede a anadirla
 					ListaSolicitudes.append(srcip)
 					#Se envia a la LAN
-					enviar.enviar_paquete(pkt,network,IpPuerto[dstip])						
+					try:
+						#Cualquier otra bandera que se envia no se la analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
+						enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
+					except:
+						print "Ip erronea"						
 						
 
 		else:
@@ -115,14 +124,22 @@ def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):
 				#A continuacion se verifica  si la direccion IP origen  esta en la lista de atacantes aun caundo se trata de uan conexion legitima (lenta) debido a que se revico la tercera via TCP.
 			elif srcip in ListaAtacantes:
 				#Se  procede a enviar el paquete 
-				enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
+				try:
+					#Cualquier otra bandera que se envia no se la analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
+					enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
+				except:
+					print "Ip erronea"
 				#Se la remueve de la lista de atacantes 
 				ListaAtacantes.remove(srcip)
 				#Se la agrega a la lsita de clientes legitimos.
 				ListaClientes.append(srcip)
 			elif srcip in ListaClientes:
 				#Se trata de uan conexxion legitima por lo que se envia el paquete sin ninguna restriccion.
-				enviar.enviar_paquete(pkt,network,IpPuerto[dstip])					
+				try:
+					#Cualquier otra bandera que se envia no se la analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
+					enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
+				except:
+					print "Ip erronea"					
 				
 	else:
 		try:
