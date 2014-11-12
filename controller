@@ -1,15 +1,32 @@
-################################################################################
-# SETUP                                                                        #
-# -------------------------------------------------------------------          #
-# mininet:  mininet.sh --topo clique,4,4 (or other single subnet)              #
-################################################################################
+#################################################################################
+#                       ESCUELA POLITECNICA NACIONAL                            #
+# ----------------------------------------------------------------------------- #
+#Tema: Aplicacion para el controlador pyretic                                   #
+#Programador: Naranjo Villota Jose Luis  (joseluisnaranjohotmail.es)            #
+#             Manzano Barrionuevo Andres Michael (andres_manzano017@hotmail.com #
+#Fecha: Lunes  20 de  Octubre de 2014                                           #
+#################################################################################
 
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
 
-def act_like_hub():
-    return flood()  # Return the policy flood
-    
+ip1 = IPAddr('192.168.0.3')
+ip2 = IPAddr('192.168.0.5')
+p = IPAddr('192.168.0.239')
+
+mac1 = EthAddr('94:de:80:7c:69:7e')
+mac2 = EthAddr('c8:3a:35:da:d6:02')
+macB = EthAddr('FF:FF:FF:FF:FF:FF')
+
+
+l3route = ((match(dstip=ip1) >> fwd(1)) +
+          (match(dstip=ip2) >> fwd(2)))
+
+forwardARP = match(ethtype=0x0806) >> flood()
+forwardICMP = match(ethtype=0x0800,protocol=1) >> flood()
+
+#policy = modify >> l3route
+
 def main():
-    return act_like_hub()
+    return l3route + forwardARP + forwardICMP
