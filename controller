@@ -1,32 +1,155 @@
-#################################################################################
-#                       ESCUELA POLITECNICA NACIONAL                            #
-# ----------------------------------------------------------------------------- #
-#Tema: Aplicacion para el controlador pyretic                                   #
-#Programador: Naranjo Villota Jose Luis  (joseluisnaranjohotmail.es)            #
-#             Manzano Barrionuevo Andres Michael (andres_manzano017@hotmail.com #
-#Fecha: Lunes  20 de  Octubre de 2014                                           #
-#################################################################################
+###################################################################################
+#                        ESCUELA POLITECNICA NACIONAL                             #
+# ------------------------------------------------------------------------------  #
+# Tema: Aplicacion para el controlador pyretic                                    #
+# Programador: Naranjo Villota Jose Luis  (joseluisnaranjo@hotmail.es)            #
+#              Manzano Barrionuevo Andres Michael (andres_manzano017@hotmail.com) #
+# Fecha: Lunes  20 de  Octubre de 2014                                            #
+###################################################################################
 
+import collections
+import arp
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
+from ConfigParser import ConfigParser
+import os 
 
-ip1 = IPAddr('192.168.0.3')
-ip2 = IPAddr('192.168.0.5')
-p = IPAddr('192.168.0.239')
+class ControladorHoneynet(DynamicPolicy):
+	config = ConfigParser()
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
+	ListaSolicitudes = []
+	ListaAtacantes = []
+	ListaClientes = []
+	numPing = 0
 
-mac1 = EthAddr('94:de:80:7c:69:7e')
-mac2 = EthAddr('c8:3a:35:da:d6:02')
-macB = EthAddr('FF:FF:FF:FF:FF:FF')
 
+	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
+	def __init__(self):
+		print "Se iniciara el constructor de la clase.."
+		self.query = packets()
+		self.remotes_ip = {}
+		self.IpPuerto = {}
+		self.query.register_callback(self.paquete)
+		self.network = None
+		super(ControladorHoneynet,self).__init__(self.query)
+		print "Ha terminado la ejecucion del constructor.."
 
-l3route = ((match(dstip=ip1) >> fwd(1)) +
-          (match(dstip=ip2) >> fwd(2)))
+	def set_network(self, network):
+		self.network = network
+	
 
-forwardARP = match(ethtype=0x0806) >> flood()
-forwardICMP = match(ethtype=0x0800,protocol=1) >> flood()
+	def paquete(self,pkt):
+		print "Se ha recibido un nuevo paquete..."
+        	switch = pkt['switch']
+        	inport = pkt['inport']
+        	srcip  = pkt['srcip']
+        	srcmac = pkt['srcmac']
+        	dstip  = pkt['dstip']
+        	dstmac = pkt['dstmac']
+        	opcode = pkt['protocol']
+		tipoo = pkt['ethtype']
 
-#policy = modify >> l3route
+		
+		#Se determinara si el paquete recibido, es o no del tipo ARP
+		if  tipoo == 2054:
+			arp.ejecutarARP(pkt,self.network, self.IpPuerto)
+
+            	#Se determinara si el paquete recibido, es o no del tipo IP
+		elif tipoo == 2048:
+
+			if opcode == 1:
+				#paquete ICMP
+				print "paquete ICMP"
+				ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
+				a = os.system(ipBcast)
+				if a == dstip:
+					enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+				else:
+					enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+
+			elif opcode == 6:
+				#paquete TCP
+				raww = pkt['raw']
+				a = raww.encode("hex")
+				#print raww
+				b = a[94:96]
+				print b
+				ipServidor = self.config.get("SYNFLOOD","ipServidor")
+				if b == "02":
+					size = len(self.ListaSolicitudes)
+					tamano = self.config.get("SYNFLOOD","tamano")
+					print tamano
+					print size
+					if size < tamano:
+						print "1111111"
+						if srcip != ipServidor:
+							print "2222222"
+							if not srcip in self.ListaSolicitudes:
+								print "33333333"
+								if not srcip in self.ListaAtacantes:
+									print "44444444"
+									if not srcip in self.ListaClientes:
+										print "555555"
+										self.ListaSolicitudes.append(srcip)
+										print self.ListaSolicitudes[-1]
+										enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+									else:	
+										print "66666"
+										enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+								else:
+									print "77777"
+									enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+							else:
+								print "88888"
+								self.ListaSolicitudes.remove(srcip)
+								self.ListaAtacantes.append(srcip)
+								enviar_paquete(pkt,self.network,self.IpPuerto[dstip])					
+							print b
+						else:
+							print "99999"
+							enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+					else:
+						self.ListaAtacantes.append(self.ListaSolicitudes[0])
+						del self.ListaSolicitudes[0]
+						self.ListaSolicitudes.append(srcip)
+				elif b == "10":
+					print "10101010"
+					if srcip != ipServidor:
+						print "12121212"
+						if srcip in self.ListaSolicitudes:
+							print "13131313"
+							enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+							self.ListaSolicitudes.remove(srcip)
+							self.ListaClientes.append(srcip)
+							print self.ListaClientes[-1]
+						elif srcip in self.ListaAtacantes:
+							print "1414141414"
+			    				enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+							self.ListaAtacantes.remove(srcip)
+							self.ListaClientes.append(srcip)
+						else:
+							print "15151515"
+							enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+					else:
+						print "16161616"
+						enviar_paquete(pkt,self.network,self.IpPuerto[dstip])				
+				else:
+					print "17171717"
+					enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+
+			else:
+				enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+
+def enviar_paquete(paquete,network,outport):
+	"""Construct an arp packet from scratch and send"""
+	print "Ejecutando senvio de paquete.."
+	rp = Packet()
+	rp = paquete
+	rp = rp.modify(outport = outport)
+	#print rp
+	network.inject_packet(rp)
 
 def main():
-    return l3route + forwardARP + forwardICMP
+	#print "Ejecutando main.."
+	return ControladorHoneynet()
