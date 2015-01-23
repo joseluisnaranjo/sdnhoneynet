@@ -9,6 +9,7 @@
 
 import collections
 import arp
+import enviar
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
@@ -23,8 +24,8 @@ class ControladorHoneynet(DynamicPolicy):
 	ListaClientes = []
 	numPing = 0
 
-
 	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
+
 	def __init__(self):
 		print "Se iniciara el constructor de la clase.."
 		self.query = packets()
@@ -55,24 +56,26 @@ class ControladorHoneynet(DynamicPolicy):
 		if  tipoo == 2054:
 			arp.ejecutarARP(pkt,self.network, self.IpPuerto)
 
-            	#Se determinara si el paquete recibido, es o no del tipo IP
+        #Se determinara si el paquete recibido, es o no del tipo IP
 		elif tipoo == 2048:
-
 			if opcode == 1:
 				#paquete ICMP
-				print "paquete ICMP"
+				print "Se ha recibido un paquete ICMP"
+				#Se determinará cual es la direcciond e broadcast de la red.
 				ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
-				a = os.system(ipBcast)
-				if a == dstip:
-					enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+				broadacas_IP = os.system(ipBcast)
+				if broadacas_IP == dstip:
+					enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 				else:
-					enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+					enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 
 			elif opcode == 6:
 				#paquete TCP
-				raww = pkt['raw']
-				a = raww.encode("hex")
-				#print raww
+				print "Se ha recibido un paquete TCP"
+				#A continuacion de extrae el payload (paquete original) del pkt OpenFlow
+				of_payload = pkt['raw']
+				a = of_payload.encode("hex")
+				#print of_payload
 				b = a[94:96]
 				print b
 				ipServidor = self.config.get("SYNFLOOD","ipServidor")
