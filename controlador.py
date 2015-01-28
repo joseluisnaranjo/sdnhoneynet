@@ -71,31 +71,36 @@ class ControladorHoneynet(DynamicPolicy):
 			elif opcode == 6:
 				#paquete TCP
 				print "Se ha recibido un paquete TCP"
-				#A continuacion de extrae el payload (paquete original) del pkt OpenFlow
-				of_payload = pkt['raw']
-				a = of_payload.encode("hex")
-				#print of_payload
-				b = a[94:96]
+				#A continuacion de extrae el payload codificado (paquete original) del pkt OpenFlow
+				of_payload_code = pkt['raw']
+				#A continucaion se codifica en hexadecimal dicho payload
+				of_payload = of_payload_code.encode("hex")
+				#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican
+				tcp_flags = of_payload[94:96]
 				print b
+				#Se obtiene  de un archivo de configuracion la ip del servidor 
 				ipServidor = self.config.get("SYNFLOOD","ipServidor")
-				if b == "02":
-					size = len(self.ListaSolicitudes)
-					tamano = self.config.get("SYNFLOOD","tamano")
-					print tamano
-					print size
-					if size < tamano:
-						print "1111111"
+				if tcp_flags == "02":
+					tamano_actual_listasolicitudes = len(self.ListaSolicitudes)
+					#Se obtiene  de un archivo de configuracion el tamaño maximo que puede tener la lista de Solicitudes de conexion TCP que ha recibido el servidor 
+					tamano_max_listasolicitudes = self.config.get("SYNFLOOD","tamano")
+					#A continuacion se verifica que el tamano de la lsiat sea menor al maximo especificado en el archivo de configuracion
+					if tamano_actual_listasolicitudes < tamano_max_listasolicitudes:
+						#A continuacion se verifica que la direccion IP origen del segmento TCP recibido no sea la del servidor
 						if srcip != ipServidor:
-							print "2222222"
+							#A continuacion se verifica que la direccion IP origen del segmento TCP recibido no se encuentre en la lista de solicitudes
 							if not srcip in self.ListaSolicitudes:
-								print "33333333"
+								#A continuacion se verifica que la direccion IP origen del segmento TCP recibido no se encuentre en la lista de atacantes
 								if not srcip in self.ListaAtacantes:
-									print "44444444"
+									#A continuacion se verifica que la direccion IP origen del segmento TCP recibido no se encuentre en la lista de Clientes lejitimos
 									if not srcip in self.ListaClientes:
-										print "555555"
+										#Debido a que noe staba en al lista de cleintes lejitimos, se procede a añadirla
 										self.ListaSolicitudes.append(srcip)
-										print self.ListaSolicitudes[-1]
-										enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+										#Se verifica que efectiamnete  se aya añadidoa alsita 
+										if self.ListaSolicitudes[-1] == srcip:
+											enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+										else:
+											print "Error al añadir  a la lista..."
 									else:	
 										print "66666"
 										enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
@@ -103,17 +108,23 @@ class ControladorHoneynet(DynamicPolicy):
 									print "77777"
 									enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 							else:
-								print "88888"
+								#Si la direccion IP origen del segmento TCP recibido SI se encuentre en la lista de solicitudes, entonces se procede a borrarla de dicha lista y,
 								self.ListaSolicitudes.remove(srcip)
+								# Se la agrega a la lista de Atacantes, puesto que se presume  esta intentando hacer un segundo intento de conexion al servidor al mismo timpo..
 								self.ListaAtacantes.append(srcip)
+								#Sin embargo se deja pasar un solo paquete paga obtener estadisticas...
+								Print "Revisar siguiente linea ... no se debe enviar todos los paquetes..."
 								enviar_paquete(pkt,self.network,self.IpPuerto[dstip])					
-							print b
+							
 						else:
-							print "99999"
+							#En caso que la direccion  Ip de origen es la del servidor, el trafico se debe deja pasar sin ninguna restriccion
 							enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 					else:
+						#En caso de que el tamano de la lista sea mayor al tamaño maximo especificado, Se añade a la lista de atacantes la primera solicitud que se agrego a la lista de solicitudes pendientes 
 						self.ListaAtacantes.append(self.ListaSolicitudes[0])
+						# A continuacion se procede a borrar la solicitud que se ha enviado a la lista de atacantes  de la lista de solicitudes para liberar un espacio
 						del self.ListaSolicitudes[0]
+						# Y finalmente se agrega la nueva solicitud a la lista de solicitudes pendientes 
 						self.ListaSolicitudes.append(srcip)
 				elif b == "10":
 					print "10101010"
