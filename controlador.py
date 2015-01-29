@@ -6,7 +6,7 @@
 #              Manzano Barrionuevo Andres Michael (andres_manzano017@hotmail.com) #
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
-#Comentario para comprobar  cambios  usando sudo git fetch..
+
 import collections
 import arp
 import enviar
