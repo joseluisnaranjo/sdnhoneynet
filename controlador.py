@@ -25,6 +25,7 @@ class ControladorHoneynet(DynamicPolicy):
 	ListaAtacantes = []
 	ListaClientes = []
 	ListaRARP = []
+	paqueteARP = Packet()
 	
 
 	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
@@ -35,6 +36,7 @@ class ControladorHoneynet(DynamicPolicy):
 		self.remotes_ip = {}
 		self.IpPuerto = {}
 		self.IpMac = {}
+		self.IpMacAtacante = {}
 		self.query.register_callback(self.paquete)
 		self.network = None
 		super(ControladorHoneynet,self).__init__(self.query)
@@ -58,7 +60,7 @@ class ControladorHoneynet(DynamicPolicy):
 		
 		#Se determinara si el paquete recibido, es o no del tipo ARP
 		if  tipoo == 2054:
-			arp.ejecutarARP(pkt,self.network, self.IpPuerto, self.IpMac)
+			arp.ejecutarARP(pkt,self.network, self.IpPuerto, self.IpMac, self.paqueteARP)
 
         	#Se determinara si el paquete recibido, es o no del tipo IP
 		elif tipoo == 2048:
@@ -66,21 +68,21 @@ class ControladorHoneynet(DynamicPolicy):
 			if self.IpMac[srcip] == srcmac && self.IpPuerto[srcip]==inport:
 
 				if opcode == 1:
-					#paquete ICMP
+					#Paquete ICMP
 					print "Se ha recibido un paquete ICMP"
 					#con el comando ping y un grep vamos a obtener la direccion de broadcasr del interface de red
 					ipBcast = "ifconfig eth0 | grep 'Bcast'| cut -d':' -f3 | cut -d' ' -f1"
 					broadacast_IP = os.system(ipBcast)
-					#se hace una comparacion con la direccion de destino si es la de broadcast para decidir a donde enviar el paquete 
+					#Se hace una comparacion con la direccion de destino si es la de broadcast para decidir a donde enviar el paquete 
 					if broadacast_IP == dstip:
-						#destino la honeynet
+						#Destino la honeynet
 						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 					else:
-						#destino la red real
+						#Destino la red real
 						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 
 				elif opcode == 6:
-					#paquete TCP
+					#Paquete TCP
 					Sync_Flood.Sync_Flood(pkt,self.network, self.IpPuerto)
 
 				else:
@@ -93,18 +95,26 @@ class ControladorHoneynet(DynamicPolicy):
 		#Se determinara si el paquete recibido, es o no del tipo RARP
 		elif tipoo == 32821:
 			#paquete RARP
+			#Lista en el que se guardaran todas las respuestas RARP
 			self.ListaRARP.append(pkt)
+			#Tiempo que esperara a que lleguen todas las respuestas RARP
 			tiempo = self.config.get("RARP","tiempo")
 			time.sleep(tiempo)
 			
-			if  len(self.ListaRARP) == 2:
+			#A continuacion se comprobara si es que llega mas de una respuesta
+			longLista = len(self.ListaRARP)
+			if  longLista >= 2:
 				num = 0
-				while (num < 2):
+				while (num < longLista):
+					#En la lista de las respuestas RARP buscamos cual es el atacante para enviarlo a la honeynet
 					if self.ListaRARP[num]['srcmac'] != self.IpMac[srcip]
-						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+						IpMacAtacante[srcip] = srcmac
+						enviar.enviar_paquete(paqueteARP,self.network,self.IpPuerto[dstip])
 					num = num + 1
+			#Si solo llega una respuesta actualizamos el diccionario IpMac y enviamos el paquete original a que se realice el ARP			
 			else:
 				IpMac[srcip] = srcmac
+				arp.ejecutarARP(paqueteARP,self.network, self.IpPuerto, self.IpMac, self.paqueteARP)
 				
 
 def main():
