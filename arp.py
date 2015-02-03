@@ -30,7 +30,7 @@ def ejecutarARP(pkt, network, IpPuerto, IpMac):
 			ejecutarEnvio(pkt, network, IpPuerto)
 
 		else:
-			if IpMac[srcip] != srcmac
+			if IpMac[srcip] != srcmac:
 				enviar.enviar_RARP(pkt,network,srcmac)
 
 	else:
@@ -53,4 +53,6 @@ def ejecutarEnvio(pkt, network, IpPuerto):
 		except:
 			print "Error en el envio de la respuesta ARP"
 		    	print pkt
+
+
 #Clase terminada  completamente... Funcionando!!!!
