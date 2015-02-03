@@ -12,9 +12,10 @@ import enviar
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
+import controlador
 
 
-def ejecutarARP(pkt, network, IpPuerto, IpMac):
+def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP):
     	switch = pkt['switch']
     	inport = pkt['inport']
     	srcip  = pkt['srcip']        
@@ -22,19 +23,37 @@ def ejecutarARP(pkt, network, IpPuerto, IpMac):
     	opcode = pkt['protocol']
 	srcmac = pkt['srcmac']
 
-	#Se determina si la ip de origen  esta en el diccionario IPPuerto, caso contrario se la agrega.
-	if not srcip in IpPuerto:
-		IpPuerto[srcip] = inport
-		if not srcip in IpMac:
-			IpMac[srcip] = srcmac
-			ejecutarEnvio(pkt, network, IpPuerto)
+	#Se determina si la ip de origen esta en el diccionario IPPuerto
+	if srcip in IpPuerto:
+		#Si es que ya existe se envia directamente
+		ejecutarEnvio(pkt, network, IpPuerto)
 
-		else:
-			if IpMac[srcip] != srcmac:
+	#Si no se encuentra en el diccionario se lo ingresa 
+	else:
+		IpPuerto[srcip] = inport
+		#Se comprueba si la direccion ip de origen ya se encuentra en el diccionario
+		if srcip in IpMac:
+			#Si ya existe esa ip se comrueba que la mac origen corresponde a la almacenada en el diccionario
+			if IpMac[srcip] == srcmac:
+				#Si ya esta registrada se envia el paquete ya que es un cliente fiable
+				ejecutarEnvio(pkt, network, IpPuerto)
+			#Si ya no esta registrado podemos dudar si se trata de una atacante 
+			else:
+				#Se guarda el paquete ARP hasta comprobar si el cliente es fiable o no
+				paqueteARP = pkt
+				#Ya que se esta dudando, para comprobar se envia un paquete RARP
 				enviar.enviar_RARP(pkt,network,srcmac)
 
-	else:
-	ejecutarEnvio(pkt, network, IpPuerto)
+		#A continuacion se comprueba si esta en el diccionario de atacantes 
+		elif srcip in IpMacAtacante
+			#Una ves que sabemos que esta en el diccionario de atacantes enviamos a la honeynet
+			ejecutarEnvio(pkt, network, IpPuerto)
+		
+		#Si no se encuentra en el diccionario IpMac quiere decir que es un cliente nuevo
+		else:
+			#Como se trata de un cliente nuevo se incluye en el diccionario y se envia el paquete
+			IpMac[srcip] = srcmac
+			ejecutarEnvio(pkt, network, IpPuerto)
 
 
 
