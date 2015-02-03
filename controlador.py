@@ -96,12 +96,13 @@ class ControladorHoneynet(DynamicPolicy):
 			self.ListaRARP.append(pkt)
 			tiempo = self.config.get("RARP","tiempo")
 			time.sleep(tiempo)
+			
 			if  len(self.ListaRARP) == 2
 				num = 0
-				while (num < 2): 
+				while (num < 2):
 					if self.ListaRARP[num]['srcmac'] != self.IpMac[srcip]
 						enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-						num = num + 1
+					num = num + 1
 			else:
 				IpMac[srcip] = srcmac
 				
