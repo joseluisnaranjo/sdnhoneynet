@@ -97,7 +97,7 @@ class ControladorHoneynet(DynamicPolicy):
 			tiempo = self.config.get("RARP","tiempo")
 			time.sleep(tiempo)
 			
-			if  len(self.ListaRARP) == 2
+			if  len(self.ListaRARP) == 2:
 				num = 0
 				while (num < 2):
 					if self.ListaRARP[num]['srcmac'] != self.IpMac[srcip]
