@@ -9,7 +9,7 @@
 #Nuevo comentario
 import collections
 import arp
-import Sync_Flood
+import syn_flood
 import enviar
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
@@ -83,7 +83,7 @@ class ControladorHoneynet(DynamicPolicy):
 
 				elif opcode == 6:
 					#Paquete TCP
-					Sync_Flood.Sync_Flood(pkt,self.network, self.IpPuerto)
+					syn_flood.syn_flood(pkt,self.network, self.IpPuerto)
 
 				else:
 					#Cualquier otro tipo de paquete que se recibano no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
