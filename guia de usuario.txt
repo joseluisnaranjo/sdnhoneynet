@@ -10,12 +10,18 @@ Como crear un servidor http en mininet( el servidor es h1)
 Como solicitar una paguina  al servidor http en mininnet( h2 solicita la pagina)
   h2 wget -O - h1
   
+Como clonar el repositorio  
+  sudo git clone https://github.com/joseluisnaranjo/sdnhoneynet
+  
 Como subir cambios desde Ubuntu al repositorio GITHUB
   sudo add git archivo.py
   sudo commint -m "Este es le comentario"
   sudo git push
   usuarioGIT
   passwordGIT
+  
+Como remover el repositorio de Ubuntu
+  sudo rm -r sdnhoneynet
   
 Enlaces Utiles:
 
