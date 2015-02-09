@@ -20,7 +20,7 @@ ListaSolicitudes = []
 ListaAtacantes = []
 ListaClientes = []
 
-def Sync_Flood(pkt, network, IpPuerto):
+def syn_flood(pkt, network, IpPuerto):
 	switch = pkt['switch']
 	inport = pkt['inport']
 	srcip  = pkt['srcip']        
