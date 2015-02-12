@@ -48,3 +48,14 @@ def enviar_RARP(paquete,network,srcmac):
 			rp = rp.modify(outport = puerto)
 			network.inject_packet(rp)
 	
+def enviar_DNS(paquete,network):
+	try:
+		rp = Packet()
+		rp = paquete
+		rp = rp.modify(dstport = "8.8.8.8")
+		print rp
+		network.inject_packet(rp)
+		print "Paquete enviado exitosamente!!..."
+		
+	except:
+		print "Error al enviar el paquete..."
