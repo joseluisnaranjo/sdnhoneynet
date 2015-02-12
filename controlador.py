@@ -25,6 +25,7 @@ class ControladorHoneynet(DynamicPolicy):
 	ListaAtacantes = []
 	ListaClientes = []
 	ListaRARP = []
+	ListaDNS = []
 	paqueteARP = Packet()
 	
 
@@ -86,23 +87,52 @@ class ControladorHoneynet(DynamicPolicy):
 					#Paquete TCP
 					syn_flood.syn_flood(pkt,self.network, self.IpPuerto)
 					
+					
+					
 				elif ((opcode == 17) and (dstport == 53)):
 					ipServidorDNS = config.get("DNS_Spoofing","ipServidorDNS")
 					of_payload_code = pkt['raw']
 					#A continucaion se codifica en hexadecimal dicho payload
 					of_payload = of_payload_code.encode("hex")
 					#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack 
-					dns_flags = of_payload[90:92]
+					dns_flags = of_payload[90:94]
+					#Se comprueba si es una pregunta dns al comprobar el contenido de su bandera
 					if (dns_flags == 0100):
 						if (dstip == ipServidorDNS):
 							enviar.enviar_paquete(pkt,set_network,self.IpPuerto[dstip])
 							
 						else:
+							enviar.enviar_paquete(pkt,set_network,self.IpPuerto[dstip])
 							enviar.enviar_DNS(pkt,self.network)
-					elif (dns_flags == 0100):
+					#En caso de que sea una respuesta, que ip corresponde al dominio preguntado
+					elif (dns_flags == 8180):
+						#Lista en el que se guardaran todas las respuestas DNS
+						self.ListaDNS.append(pkt)
+						#Tiempo que esperara a que lleguen todas las respuestas DNS
+						tiempo = self.config.get("DNS_Spoofing","tiempo")
+						time.sleep(tiempo)
+						num = 0
+						while (num < 2):
+							of_payload_code = self.ListaDNS[num]['raw']
+							#A continucaion se codifica en hexadecimal dicho payload
+							of_payload = of_payload_code.encode("hex")
+							#A continuacion se  extrae la ip que se envia como respuesta del dns 
+							ip_Respuesta[num] = of_payload[172:180]	
+							num = num + 1
 						
-					
+						if (ip_Respuesta[0] == ip_Respuesta[1]):
+							enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+						else:
+							num = 0
+							while(num < 2)
+								if self.ListaDNS[num]['srcip'] != "8.8.8.8"
+									enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+								num = num + 0	
+							
 
+							
+							
+							
 				else:
 					#Cualquier otro tipo de paquete que se recibano no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
 					enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])

@@ -17,10 +17,9 @@ import controlador
 
 def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP, IpMacAtacante):
     	
-    	inport = pkt['inport']
-    	srcip  = pkt['srcip']        
-    	dstip  = pkt['dstip']        
-
+    inport = pkt['inport']
+    srcip  = pkt['srcip']        
+    dstip  = pkt['dstip']        
 	srcmac = pkt['srcmac']
 
 	#Se determina si la ip de origen esta en el diccionario IPPuerto
