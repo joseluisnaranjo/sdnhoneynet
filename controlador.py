@@ -27,6 +27,7 @@ class ControladorHoneynet(DynamicPolicy):
 	ListaRARP = []
 	ListaDNS = []
 	paqueteARP = Packet()
+	identificador 
 	
 
 	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
@@ -49,13 +50,13 @@ class ControladorHoneynet(DynamicPolicy):
 
 	def paquete(self,pkt):
 		print "Se ha recibido un nuevo paquete..."
-        switch = pkt['switch']
-     	inport = pkt['inport']
-     	srcip  = pkt['srcip']
-        srcmac = pkt['srcmac']
-        dstip  = pkt['dstip']
-        dstmac = pkt['dstmac']
-        opcode = pkt['protocol']
+        	switch = pkt['switch']
+     		inport = pkt['inport']
+     		srcip  = pkt['srcip']
+        	srcmac = pkt['srcmac']
+        	dstip  = pkt['dstip']
+        	dstmac = pkt['dstmac']
+        	opcode = pkt['protocol']
 		tipoo = pkt['ethtype']
 		dstport = pkt ['dstport']
 
@@ -64,7 +65,7 @@ class ControladorHoneynet(DynamicPolicy):
 		if  tipoo == 2054:
 			arp.ejecutarARP(pkt,self.network, self.IpPuerto, self.IpMac, self.paqueteARP, self.IpMacAtacante)
 
-        #Se determinara si el paquete recibido, es o no del tipo IP
+        	#Se determinara si el paquete recibido, es o no del tipo IP
 		elif tipoo == 2048:
 			#A continuacion se hace una comprobacion de la ip y el puerto de origen con los datos obtenidos al hacer el ARP 
 			if ((self.IpMac[srcip] == srcmac) and (self.IpPuerto[srcip]==inport)):
@@ -91,11 +92,7 @@ class ControladorHoneynet(DynamicPolicy):
 					
 				elif ((opcode == 17) and (dstport == 53)):
 					ipServidorDNS = config.get("DNS_Spoofing","ipServidorDNS")
-					of_payload_code = pkt['raw']
-					#A continucaion se codifica en hexadecimal dicho payload
-					of_payload = of_payload_code.encode("hex")
-					#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack 
-					dns_flags = of_payload[90:94]
+					dns_flags=payload(90,94)
 					#Se comprueba si es una pregunta dns al comprobar el contenido de su bandera
 					if (dns_flags == 0100):
 						if (dstip == ipServidorDNS):
@@ -113,11 +110,9 @@ class ControladorHoneynet(DynamicPolicy):
 						time.sleep(tiempo)
 						num = 0
 						while (num < 2):
-							of_payload_code = self.ListaDNS[num]['raw']
-							#A continucaion se codifica en hexadecimal dicho payload
-							of_payload = of_payload_code.encode("hex")
 							#A continuacion se  extrae la ip que se envia como respuesta del dns 
-							ip_Respuesta[num] = of_payload[172:180]	
+							ip_Respuesta[num] = payload(172,180)	
+							
 							num = num + 1
 						
 						if (ip_Respuesta[0] == ip_Respuesta[1]):
@@ -166,6 +161,14 @@ class ControladorHoneynet(DynamicPolicy):
 				IpMac[srcip] = srcmac
 				arp.ejecutarARP(paqueteARP,self.network, self.IpPuerto, self.IpMac, self.paqueteARP)
 				
+
+	def payload(num1,num2):	
+		of_payload_code = pkt['raw']
+		#A continucaion se codifica en hexadecimal dicho payload
+		of_payload = of_payload_code.encode("hex")
+		#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack  
+		return of_payload[num1:num2]
+
 
 def main():
 	#print "Ejecutando main.."
