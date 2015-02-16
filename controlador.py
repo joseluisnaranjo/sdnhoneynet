@@ -50,13 +50,13 @@ class ControladorHoneynet(DynamicPolicy):
 
 	def paquete(self,pkt):
 		print "Se ha recibido un nuevo paquete..."
-        	switch = pkt['switch']
-     		inport = pkt['inport']
-     		srcip  = pkt['srcip']
-        	srcmac = pkt['srcmac']
-        	dstip  = pkt['dstip']
-        	dstmac = pkt['dstmac']
-        	opcode = pkt['protocol']
+        switch = pkt['switch']
+     	inport = pkt['inport']
+     	srcip  = pkt['srcip']
+        srcmac = pkt['srcmac']
+        dstip  = pkt['dstip']
+        dstmac = pkt['dstmac']
+        opcode = pkt['protocol']
 		tipoo = pkt['ethtype']
 		dstport = pkt ['dstport']
 
