@@ -52,7 +52,7 @@ def enviar_DNS(paquete,network):
 	try:
 		rp = Packet()
 		rp = paquete
-		rp = rp.modify(dstport = "8.8.8.8")
+		rp = rp.modify(dstip = "8.8.8.8")
 		print rp
 		network.inject_packet(rp)
 		print "Paquete enviado exitosamente!!..."
