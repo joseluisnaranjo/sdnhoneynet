@@ -102,11 +102,11 @@ class ControladorHoneynet(DynamicPolicy):
 						else:
 							enviar.enviar_paquete(pkt,set_network,self.IpPuerto[dstip])
 							enviar.enviar_DNS(pkt,self.network)
-							self.identificador=payload(,)
+							self.identificador=payload(86,88)
 							self.lenURL = len(payload(,))
 					#En caso de que sea una respuesta, que ip corresponde al dominio preguntado
 					elif (dns_flags == 8180):
-						idRespuestas = payload(,)
+						idRespuestas = payload(86,88)
 						if (idRespuestas == self.identificador):
 							#Lista en el que se guardaran todas las respuestas DNS
 							self.ListaDNS.append(pkt)
