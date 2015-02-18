@@ -93,7 +93,7 @@ class ControladorHoneynet(DynamicPolicy):
 					
 				elif ((opcode == 17) and (dstport == 53)):
 					ipServidorDNS = config.get("DNS_Spoofing","ipServidorDNS")
-					dns_flags=payload(90,94)
+					dns_flags=payload(90,93)
 					#Se comprueba si es una pregunta dns al comprobar el contenido de su bandera
 					if (dns_flags == 0100):
 						if (dstip == ipServidorDNS):
@@ -102,11 +102,11 @@ class ControladorHoneynet(DynamicPolicy):
 						else:
 							enviar.enviar_paquete(pkt,set_network,self.IpPuerto[dstip])
 							enviar.enviar_DNS(pkt,self.network)
-							self.identificador=payload(86,88)
-							self.lenURL = len(payload(,))
+							self.identificador=payload(86,89)
+							self.lenURL = len(payload(110,len(pkt['raw'])-8))
 					#En caso de que sea una respuesta, que ip corresponde al dominio preguntado
 					elif (dns_flags == 8180):
-						idRespuestas = payload(86,88)
+						idRespuestas = payload(86,89)
 						if (idRespuestas == self.identificador):
 							#Lista en el que se guardaran todas las respuestas DNS
 							self.ListaDNS.append(pkt)
@@ -116,7 +116,7 @@ class ControladorHoneynet(DynamicPolicy):
 							num = 0
 							while (num < 2):
 								#A continuacion se  extrae la ip que se envia como respuesta del dns 
-								ubicacion = lenURL + 172
+								ubicacion = lenURL + 142
 								ip_Respuesta[num] = payload(ubicacion,ubicacion + 8)	
 								
 								num = num + 1
@@ -129,6 +129,8 @@ class ControladorHoneynet(DynamicPolicy):
 									if self.ListaDNS[num]['srcip'] != "8.8.8.8"
 										enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 									num = num + 0	
+						else:
+							enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])	
 							
 
 							
