@@ -20,7 +20,7 @@ config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser
 def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 	dstip  = pkt['dstip']
 	ipServidorDNS = config.get("DNS_Spoofing","ipServidorDNS")
-	dns_flags=payload(90,93)
+	dns_flags=payload(pkt,90,93)
 	#Se comprueba si es una pregunta dns al comprobar el contenido de su bandera
 	if (dns_flags == 0100):
 		if (dstip == ipServidorDNS):
@@ -29,11 +29,11 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 		else:
 			enviar.enviar_paquete(pkt,set_network,IpPuerto[dstip])
 			enviar.enviar_DNS(pkt,network)
-			identificador=payload(86,89)
-			lenURL = len(payload(110,len(pkt['raw'])-8))
+			identificador=payload(pkt,86,89)
+			lenURL = len(payload(pkt,110,len(pkt['raw'])-8))
 	#En caso de que sea una respuesta, que ip corresponde al dominio preguntado
 	elif (dns_flags == 8180):
-		idRespuestas = payload(86,89)
+		idRespuestas = payload(pkt,86,89)
 		if (idRespuestas == identificador):
 			#Lista en el que se guardaran todas las respuestas DNS
 			ListaDNS.append(pkt)
@@ -44,7 +44,7 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 			while (num < 2):
 				#A continuacion se  extrae la ip que se envia como respuesta del dns 
 				ubicacion = lenURL + 142
-				ip_Respuesta[num] = payload(ubicacion,ubicacion + 8)	
+				ip_Respuesta[num] = payload(pkt,ubicacion,ubicacion + 8)	
 								
 				num = num + 1
 			
@@ -59,7 +59,7 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 		else:
 			enviar.enviar_paquete(pkt,network,IpPuerto[dstip])	
 			
-def payload(num1,num2):	
+def payload(pkt,num1,num2):	
 	of_payload_code = pkt['raw']
 	#A continucaion se codifica en hexadecimal dicho payload
 	of_payload = of_payload_code.encode("hex")
