@@ -27,7 +27,8 @@ class ControladorHoneynet(DynamicPolicy):
 	ListaRARP = []
 	ListaDNS = []
 	paqueteARP = Packet()
-	identificador 
+	identificador = ""
+	lenURL = 0
 	
 
 	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
@@ -101,35 +102,40 @@ class ControladorHoneynet(DynamicPolicy):
 						else:
 							enviar.enviar_paquete(pkt,set_network,self.IpPuerto[dstip])
 							enviar.enviar_DNS(pkt,self.network)
+							self.identificador=payload(,)
+							self.lenURL = len(payload(,))
 					#En caso de que sea una respuesta, que ip corresponde al dominio preguntado
 					elif (dns_flags == 8180):
-						#Lista en el que se guardaran todas las respuestas DNS
-						self.ListaDNS.append(pkt)
-						#Tiempo que esperara a que lleguen todas las respuestas DNS
-						tiempo = self.config.get("DNS_Spoofing","tiempo")
-						time.sleep(tiempo)
-						num = 0
-						while (num < 2):
-							#A continuacion se  extrae la ip que se envia como respuesta del dns 
-							ip_Respuesta[num] = payload(172,180)	
-							
-							num = num + 1
-						
-						if (ip_Respuesta[0] == ip_Respuesta[1]):
-							enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-						else:
+						idRespuestas = payload(,)
+						if (idRespuestas == self.identificador):
+							#Lista en el que se guardaran todas las respuestas DNS
+							self.ListaDNS.append(pkt)
+							#Tiempo que esperara a que lleguen todas las respuestas DNS
+							tiempo = self.config.get("DNS_Spoofing","tiempo")
+							time.sleep(tiempo)
 							num = 0
-							while(num < 2)
-								if self.ListaDNS[num]['srcip'] != "8.8.8.8"
-									enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-								num = num + 0	
+							while (num < 2):
+								#A continuacion se  extrae la ip que se envia como respuesta del dns 
+								ubicacion = lenURL + 172
+								ip_Respuesta[num] = payload(ubicacion,ubicacion + 8)	
+								
+								num = num + 1
+							
+							if (ip_Respuesta[0] == ip_Respuesta[1]):
+								enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+							else:
+								num = 0
+								while(num < 2)
+									if self.ListaDNS[num]['srcip'] != "8.8.8.8"
+										enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
+									num = num + 0	
 							
 
 							
 							
 							
 				else:
-					#Cualquier otro tipo de paquete que se recibano no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
+					#Cualquier otro tipo de paquete que se reciba no se analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
 					enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 				print "Ver si se envia al puerto de la honeynet" 
 			else:
