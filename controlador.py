@@ -11,6 +11,7 @@ import collections
 import arp
 import syn_flood
 import enviar
+import dns_spoofing
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
@@ -92,45 +93,7 @@ class ControladorHoneynet(DynamicPolicy):
 					
 					
 				elif ((opcode == 17) and (dstport == 53)):
-					ipServidorDNS = config.get("DNS_Spoofing","ipServidorDNS")
-					dns_flags=payload(90,93)
-					#Se comprueba si es una pregunta dns al comprobar el contenido de su bandera
-					if (dns_flags == 0100):
-						if (dstip == ipServidorDNS):
-							enviar.enviar_paquete(pkt,set_network,self.IpPuerto[dstip])
-							
-						else:
-							enviar.enviar_paquete(pkt,set_network,self.IpPuerto[dstip])
-							enviar.enviar_DNS(pkt,self.network)
-							self.identificador=payload(86,89)
-							self.lenURL = len(payload(110,len(pkt['raw'])-8))
-					#En caso de que sea una respuesta, que ip corresponde al dominio preguntado
-					elif (dns_flags == 8180):
-						idRespuestas = payload(86,89)
-						if (idRespuestas == self.identificador):
-							#Lista en el que se guardaran todas las respuestas DNS
-							self.ListaDNS.append(pkt)
-							#Tiempo que esperara a que lleguen todas las respuestas DNS
-							tiempo = self.config.get("DNS_Spoofing","tiempo")
-							time.sleep(tiempo)
-							num = 0
-							while (num < 2):
-								#A continuacion se  extrae la ip que se envia como respuesta del dns 
-								ubicacion = lenURL + 142
-								ip_Respuesta[num] = payload(ubicacion,ubicacion + 8)	
-								
-								num = num + 1
-							
-							if (ip_Respuesta[0] == ip_Respuesta[1]):
-								enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-							else:
-								num = 0
-								while(num < 2)
-									if self.ListaDNS[num]['srcip'] != "8.8.8.8"
-										enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
-									num = num + 0	
-						else:
-							enviar.enviar_paquete(pkt,self.network,self.IpPuerto[dstip])	
+					dns_spoofing.dns_spoofing(pkt,self.network,self.IpPuerto,self.identificador,self.lenURL,self.ListaDNS)
 							
 
 							
@@ -170,12 +133,7 @@ class ControladorHoneynet(DynamicPolicy):
 				arp.ejecutarARP(paqueteARP,self.network, self.IpPuerto, self.IpMac, self.paqueteARP)
 				
 
-	def payload(num1,num2):	
-		of_payload_code = pkt['raw']
-		#A continucaion se codifica en hexadecimal dicho payload
-		of_payload = of_payload_code.encode("hex")
-		#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack  
-		return of_payload[num1:num2]
+
 
 
 def main():
