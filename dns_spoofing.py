@@ -21,6 +21,7 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 	dstip  = pkt['dstip']
 	ipServidorDNS = config.get("DNS_Spoofing","ipServidorDNS")
 	dns_flags=payload(pkt,90,93)
+	lenPayload = len(pkt['raw'].encode("hex"))
 	#Se comprueba si es una pregunta dns al comprobar el contenido de su bandera
 	if (dns_flags == 0100):
 		if (dstip == ipServidorDNS):
@@ -30,7 +31,7 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 			enviar.enviar_paquete(pkt,set_network,IpPuerto[dstip])
 			enviar.enviar_DNS(pkt,network)
 			identificador=payload(pkt,86,89)
-			lenURL = len(payload(pkt,110,len(pkt['raw'])-8))
+			lenURL = len(payload(pkt,110,lenPayload-9))
 	#En caso de que sea una respuesta, que ip corresponde al dominio preguntado
 	elif (dns_flags == 8180):
 		idRespuestas = payload(pkt,86,89)
@@ -44,7 +45,20 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 			while (num < 2):
 				#A continuacion se  extrae la ip que se envia como respuesta del dns 
 				ubicacion = lenURL + 142
-				ip_Respuesta[num] = payload(pkt,ubicacion,ubicacion + 8)	
+				
+				
+				'''
+				ipS_Respuestas = payload(pkt,ubicacion,lenPayload-1)
+				cadenaRespuestas = ipS_Respuestas.split('00010001')
+				fila=0
+				for ip_Respuesta in cadenaRespuestas:
+					ipRespuesta[num][fila]=ip_Respuesta[14:21]
+					fila=fila+1
+				'''	
+				
+				
+				
+				ip_Respuesta[num] = payload(ListaDNS[num],ubicacion,lenPayload-1)	
 								
 				num = num + 1
 			
@@ -54,7 +68,7 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 				num = 0
 				while(num < 2)
 					if ListaDNS[num]['srcip'] != "8.8.8.8"
-						enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
+						enviar.enviar_paquete(ListaDNS[num],network,IpPuerto[dstip])
 					num = num + 0	
 		else:
 			enviar.enviar_paquete(pkt,network,IpPuerto[dstip])	
