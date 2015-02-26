@@ -55,12 +55,12 @@ class ControladorHoneynet(DynamicPolicy):
         	switch = pkt['switch']
      		inport = pkt['inport']
 	     	srcip  = pkt['srcip']
-		srcmac = pkt['srcmac']
-		dstip = pkt['dstip']
-		dstmac = pkt['dstmac']
-		opcode = pkt['protocol']
-		tipoo = pkt['ethtype']
-		dstport = pkt ['dstport']
+			srcmac = pkt['srcmac']
+			dstip = pkt['dstip']
+			dstmac = pkt['dstmac']
+			opcode = pkt['protocol']
+			tipoo = pkt['ethtype']
+			 
 
 		
 		#Se determinara si el paquete recibido, es o no del tipo ARP
@@ -92,10 +92,18 @@ class ControladorHoneynet(DynamicPolicy):
 					
 					
 					
-				elif ((opcode == 17) and (dstport == 53)):
-					dns_spoofing.dns_spoofing(pkt,self.network,self.IpPuerto,self.identificador,self.lenURL,self.ListaDNS)
-							
-
+				elif opcode == 17:
+					
+					#A continuacion de extrae el payload codificado (paquete original) del pkt OpenFlow
+					of_payload_code = pkt['raw']
+					#A continucaion se codifica en hexadecimal dicho payload
+					of_payload = of_payload_code.encode("hex")
+					#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack 
+					dstport = of_payload[74:78]
+					if (dstport == 0053):
+						dns_spoofing.dns_spoofing(pkt,self.network,self.IpPuerto,self.identificador,self.lenURL,self.ListaDNS)
+					else:		
+						enviar_paquete(pkt,self.network,self.IpPuerto[dstip])
 							
 							
 							

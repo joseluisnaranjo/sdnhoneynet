@@ -21,24 +21,35 @@ ListaAtacantes = []
 ListaClientes = []
 
 def syn_flood(pkt, network, IpPuerto):
+
+	#paquete TCP
+	print "Se ha recibido un paquete TCP"
+	tcp_flags = payload(pkt,94,96)
+	dstport = payload(pkt,74,78)
+	srcport = payload(pkt,70,74)
+	ssl_flags = payload(pkt,120,122)
+	ssl_datos 
+	if (dstport == 0443):
+		print ssl_flags
+		comprobarFlags(pkt,network,IpPuerto,ssl_flags,"01","LL")
+	elif (srcport == 0443):
+		comprobarFlags(pkt,network,IpPuerto,ssl_flags,"LL","23")
+	else:
+		print tcp_flags
+		comprobarFlags(pkt,network,IpPuerto,tcp_flags,"02","10")
+	
+	
+	
+def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):	
 	switch = pkt['switch']
 	inport = pkt['inport']
 	srcip  = pkt['srcip']        
 	dstip  = pkt['dstip']        
 	opcode = pkt['protocol']
-	
-	#paquete TCP
-	print "Se ha recibido un paquete TCP"
-	#A continuacion de extrae el payload codificado (paquete original) del pkt OpenFlow
-	of_payload_code = pkt['raw']
-	#A continucaion se codifica en hexadecimal dicho payload
-	of_payload = of_payload_code.encode("hex")
-	#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack 
-	tcp_flags = of_payload[94:96]
 	#Se obtiene  de un archivo de configuracion la ip del servidor 
 	ipServidor = config.get("SYNFLOOD","ipServidor")
 	#A continuacion se verifica si se trata de una peticion (SYN)
-	if tcp_flags == "02":
+	if flag == flagInicial:
 		#A continuacion se obtiene el tamano de la lista de solicitudes para limitar el numero de solicitudes permitidas
 		tamano_actual_listasolicitudes = len(ListaSolicitudes)
 		#Se obtiene  de un archivo de configuracion el tamano maximo que puede tener la lista de Solicitudes de conexion TCP que ha recibido el servidor 
@@ -91,7 +102,7 @@ def syn_flood(pkt, network, IpPuerto):
 			# Y finalmente se agrega la nueva solicitud a la lista de solicitudes pendientes 
 			ListaSolicitudes.append(srcip)
 	#A continuacion se verifica si se trata de una respuesta a la peticion (ack) (tercera via de la conexion TCP)
-	elif tcp_flags == "10":					
+	elif flag == flagFinal:					
 		#A continuacion se verifica si la direccion ip origen es la direccion del servidor 
 		if srcip == ipServidor:
 			#Se envia el paquete sin ninguna restriccion 
@@ -121,4 +132,11 @@ def syn_flood(pkt, network, IpPuerto):
 	else:
 		#Cualquier otra bandera que se envia no se la analiza en este proyecto por lo que se envia el paquete sin niguna restriccion.
 		enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
+		
+def payload(pkt,num1,num2):	
+	of_payload_code = pkt['raw']
+	#A continucaion se codifica en hexadecimal dicho payload
+	of_payload = of_payload_code.encode("hex")
+	#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack  
+	return of_payload[num1:num2]			
 		
