@@ -26,7 +26,7 @@ def syn_flood(pkt, network, IpPuerto, ListaAtacantes,ListaClientes,ListaSolicitu
 	dstport = payload(pkt,74,78)
 	srcport = payload(pkt,70,74)
 	ssl_flags = payload(pkt,120,122)
-	ssl_datos = payload(pkt,120,122)
+	ssl_datos = payload(pkt,110,112)
 	#Si el paquete corresponde a una peticion SSL
 	if (dstport == 0443):
 		print ssl_flags
