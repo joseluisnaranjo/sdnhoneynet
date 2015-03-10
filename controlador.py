@@ -52,9 +52,9 @@ class ControladorHoneynet(DynamicPolicy):
 
 	def paquete(self,pkt):
 		print "Se ha recibido un nuevo paquete..."
-        	switch = pkt['switch']
-     		inport = pkt['inport']
-	     	srcip  = pkt['srcip']
+        switch = pkt['switch']
+     	inport = pkt['inport']
+	    srcip  = pkt['srcip']
 		srcmac = pkt['srcmac']
 		dstip = pkt['dstip']
 		dstmac = pkt['dstmac']
@@ -93,10 +93,10 @@ class ControladorHoneynet(DynamicPolicy):
 
 					elif opcode == 6:
 						#Paquete TCP
-						syn_flood.syn_flood(pkt,self.network, self.IpPuerto)
+						syn_flood.syn_flood(pkt,self.network, self.IpPuerto,self.ListaAtacantes,self.ListaClientes,self.ListaSolicitudes)
 					
 					
-					
+					# Si corresponde a un paquete UDP
 					elif opcode == 17:
 					
 						#A continuacion de extrae el payload codificado (paquete original) del pkt OpenFlow

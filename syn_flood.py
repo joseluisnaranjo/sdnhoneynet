@@ -16,11 +16,9 @@ from ConfigParser import ConfigParser
 
 config = ConfigParser()
 config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
-ListaSolicitudes = []
-ListaAtacantes = []
-ListaClientes = []
+puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 
-def syn_flood(pkt, network, IpPuerto):
+def syn_flood(pkt, network, IpPuerto, ListaAtacantes,ListaClientes,ListaSolicitudes):
 
 	#paquete TCP
 	print "Se ha recibido un paquete TCP"
@@ -28,12 +26,13 @@ def syn_flood(pkt, network, IpPuerto):
 	dstport = payload(pkt,74,78)
 	srcport = payload(pkt,70,74)
 	ssl_flags = payload(pkt,120,122)
-	ssl_datos 
+	ssl_datos = payload(pkt,120,122)
+	#Si el paquete corresponde a una peticion SSL
 	if (dstport == 0443):
 		print ssl_flags
 		comprobarFlags(pkt,network,IpPuerto,ssl_flags,"01","LL")
 	elif (srcport == 0443):
-		comprobarFlags(pkt,network,IpPuerto,ssl_flags,"LL","23")
+		comprobarFlags(pkt,network,IpPuerto,ssl_datos,"LL","23")
 	else:
 		print tcp_flags
 		comprobarFlags(pkt,network,IpPuerto,tcp_flags,"02","10")
@@ -41,11 +40,9 @@ def syn_flood(pkt, network, IpPuerto):
 	
 	
 def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):	
-	switch = pkt['switch']
-	inport = pkt['inport']
+
 	srcip  = pkt['srcip']        
 	dstip  = pkt['dstip']        
-	opcode = pkt['protocol']
 	#Se obtiene  de un archivo de configuracion la ip del servidor 
 	ipServidor = config.get("SYNFLOOD","ipServidor")
 	#A continuacion se verifica si se trata de una peticion (SYN)
@@ -70,28 +67,24 @@ def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):
 					ListaAtacantes.append(srcip)
 					#Sin embargo se deja pasar un solo paquete paga obtener estadisticas
 					print "Revisar siguiente linea no se debe enviar todos los paquetes..."
-					enviar.enviar_paquete(pkt,network,IpPuerto[dstip])								
+					#Al tratarse de un ataque le enviamos al puerto de la honeynet
+					enviar.enviar_paquete(pkt,network,puertoHoneynet)								
 																					
-				else:
-					#A continuacion se verifica que la direccion IP origen del segmento TCP recibido  se encuentre en la lista de atacantes
-					if srcip in ListaAtacantes:
-						#Se envia el paquete a la honeynet 
-						print "Revisar  a donde se envia el paquete!!!"
-						enviar.enviar_paquete(pkt,network,IpPuerto[dstip])		
+				#A continuacion se verifica que la direccion IP origen del segmento TCP recibido  se encuentre en la lista de atacantes
+				elif srcip in ListaAtacantes:
+					#Se envia el paquete a la honeynet 
+					print "Revisar  a donde se envia el paquete!!!"
+					enviar.enviar_paquete(pkt,network,puertoHoneynet)		
 
-					else:
-						#A continuacion se verifica que la direccion IP origen del segmento TCP recibido se encuentre en la lista de Clientes lejitimos
-						if srcip in ListaClientes:
-							enviar.enviar_paquete(pkt,network,IpPuerto[dstip])									
+				#A continuacion se verifica que la direccion IP origen del segmento TCP recibido se encuentre en la lista de Clientes lejitimos
+				elif srcip in ListaClientes:
+					enviar.enviar_paquete(pkt,network,IpPuerto[dstip])									
 
-						else:	
-							#Debido a que no estaba en al lista de clientes lejitimos, se procede a anadirla
-							ListaSolicitudes.append(srcip)
-							#Se verifica que efectivamente  se haya anadido a la lista 
-							if ListaSolicitudes[-1] == srcip:
-								enviar.enviar_paquete(pkt,network,IpPuerto[dstip])
-							else:
-								print "Error al anadir  a la lista..."							
+				else:	
+					#Debido a que no estaba en al lista de clientes lejitimos, se procede a anadirla
+					ListaSolicitudes.append(srcip)
+					#Se envia a la LAN
+					enviar.enviar_paquete(pkt,network,IpPuerto[dstip])						
 						
 
 		else:
@@ -125,7 +118,7 @@ def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):
 				ListaAtacantes.remove(srcip)
 				#Se la agrega a la lsita de clientes legitimos.
 				ListaClientes.append(srcip)
-			else:
+			elif srcip in ListaClientes:
 				#Se trata de uan conexxion legitima por lo que se envia el paquete sin ninguna restriccion.
 				enviar.enviar_paquete(pkt,network,IpPuerto[dstip])					
 				
