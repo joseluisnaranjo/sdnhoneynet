@@ -33,7 +33,7 @@ Como configurar el openvswitch
 
   Espicificar el controlador
     ovs-vsctl set-controller br-int tcp:192.168.0.250:6633
-  
+  sudo service openvswitch-controller stop
 Enlaces Utiles:
 
   Arp Spoofing: http://linuxgnublog.org/envenamiento-de-las-tablas-arp-arp-spoofing
