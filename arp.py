@@ -59,7 +59,7 @@ def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacA
 
 def tipoARP(pkt, network, puerto):
 	switch = pkt['switch']
-    opcode = pkt['protocol']
+	opcode = pkt['protocol']
 	inport = pkt['inport']
 	dstip  = pkt['dstip']
 	#Si el paquete ARP recibido, es una solicitud se procede a  reenviarlo por todos los puerto, escepto por el que llego.
