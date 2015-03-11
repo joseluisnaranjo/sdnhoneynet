@@ -17,8 +17,7 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 from ConfigParser import ConfigParser
 import os 
-import time/home/mininet/pyretic
-/home/mininet/pyretic
+
 class ControladorHoneynet(DynamicPolicy):
 	config = ConfigParser()
 	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
@@ -52,9 +51,9 @@ class ControladorHoneynet(DynamicPolicy):
 
 	def paquete(self,pkt):
 		print "Se ha recibido un nuevo paquete..."
-        switch = pkt['switch']
-     	inport = pkt['inport']
-	    srcip  = pkt['srcip']
+	        switch = pkt['switch']
+     		inport = pkt['inport']
+		srcip  = pkt['srcip']
 		srcmac = pkt['srcmac']
 		dstip = pkt['dstip']
 		dstmac = pkt['dstmac']
