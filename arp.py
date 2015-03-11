@@ -53,7 +53,10 @@ def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacA
 		else:
 			#Como se trata de un cliente nuevo se incluye en el diccionario y se envia el paquete
 			IpMac[srcip] = srcmac
-			tipoARP(pkt, network, IpPuerto[dstip])
+			try:
+				tipoARP(pkt, network, IpPuerto[dstip])
+			except:
+				tipoARP(pkt, network, puertoHoneynet)
 
 
 
