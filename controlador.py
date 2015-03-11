@@ -120,7 +120,7 @@ class ControladorHoneynet(DynamicPolicy):
 				
 
 			except:	
-
+				self.IpMac[srcip] = srcmac
 				print "Se debe hacer un ARP"		
 			
 			
@@ -147,7 +147,8 @@ class ControladorHoneynet(DynamicPolicy):
 					num = num + 1
 			#Si solo llega una respuesta actualizamos el diccionario IpMac y enviamos el paquete original a que se realice el ARP			
 			else:
-				IpMac[srcip] = srcmac
+				IpPuerto["10.0.0.1"] = 1
+				IpPuerto["10.0.0.2"] = 3
 				arp.ejecutarARP(paqueteARP,self.network, self.IpPuerto, self.IpMac, self.paqueteARP)
 				
 
