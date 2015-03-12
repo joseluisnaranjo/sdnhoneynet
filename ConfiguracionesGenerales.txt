@@ -1,0 +1,49 @@
+Configuracion maquina virtual Pyretic
+
+1.- Descargar de http://www.frenetic-lang.org/pyretic/ 
+	Official pre-packaged Pyretic VM (32-bit), la maquina de 64 bits no corre en VSphere en el servidor.
+2.- Se debe  descomprimir el archivo .zip e importarlo a vmware Desktop  antes de cargarlo al VShpere,
+	caso contrario no se abrira en el servidor.
+3.-	Una vez encendida la maquina, ya tiene habilitado  SSH, pero hay que habilitar el Xdisplay, para ello:
+	a) En el servidor, editar un el archivo de configuracion con el comando:
+		sudo nano /etc/ssh/ssh_config y modificar la opción: X11Forwarding yes
+	b) Nos conectamos usando SSH  y digitamos el comando : sudo nano /etc/apt/sources.list
+		Borramos todo el contenido del archivo y cargamos los repositorios obtenidos en :
+		http://www.espaciolinux.com/foros/software/repositorios-para-ubuntu-trusty-tahr-t52199.html
+		
+		Luego  digitamos, sudo apt-get update para actualizar los repositorios  y a continuacion:
+		sudo apt-get install gedit , este editor de texto nos facilitara el uso de los archivos.
+		
+	c) Para conectarnos con el servidor usando ssh y usando xdisplay :
+		windows: 
+			descargar y correr el programa: Xming
+			desdecargar y correr el PUTTY con las copciones siguinetes habilidas:
+				pestana Session colocar la IP y habilitar SSH
+				pestana Window, Color , habilitar la opcion Use system Color
+				Pestana connection, SSH, X11, habilitar la opcion Enable X11 forwarding.
+		Linux:
+			desde un terminal digitamos:
+			sudo ssh -X mininet@192.168.03.100,  donde la IP luego de @ es la del controlador
+			se deben poner las ocntraseñas pedidas.
+			
+	   
+	 
+		
+Configuracion estatica de una interfaz de red en Linux
+
+	se debe editar el archivo de configuracion de interfaces:
+		sudo gedit /etc/network/interfaces
+	se debe remplazar  las lineas :
+		auto eth0
+		iface eth0 inet static
+	por:
+		auto eth0
+		iface eth0 inet static
+		address 192.168.0.100
+		network 192.168.0.0
+		netmask 255.255.255.0
+		broadcast 192.168.0.255
+		gateway 192.168.0.1
+	Finalmente, se debe reinicial el pc con:
+		sudo shutdown -P now  ó
+		sudo reboot -P now 
