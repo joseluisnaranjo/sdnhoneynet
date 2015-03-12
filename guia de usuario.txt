@@ -14,8 +14,8 @@ Como clonar el repositorio
   sudo git clone https://github.com/joseluisnaranjo/sdnhoneynet
   
 Como subir cambios desde Ubuntu al repositorio GITHUB
-  sudo add git archivo.py
-  sudo commint -m "Este es le comentario"
+  sudo git add  archivo.py
+  sudo git commit -m "Este es le comentario"
   sudo git push
   usuarioGIT
   passwordGIT
