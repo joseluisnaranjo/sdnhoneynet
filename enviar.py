@@ -70,7 +70,7 @@ def enviar_ARP(paquete,network):
 	rp = rp.modify(header_len = 14)
 	rp = rp.modify(payload_len = 28)
 	rp = rp.modify(inport = portin)
-	a = "FFFFFFFFFFFF" + hexMAC(str(macsrc)) + "08060001080006040001" + hexMAC(str(macsrc))+ hexipsrc + "000000000000" + hexipdst
+	a = "FFFFFFFFFFFF" + hexMAC(str(macsrc)) + "08060001080006040001" + hexMAC(str(macsrc)) + hexipsrc + "000000000000" + hexipdst
 	rp = rp.modify(raw = binascii.unhexlify(a))
 	#print rp
 	for port in network.topology.egress_locations() - {Location(switchh,portin)}:
