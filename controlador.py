@@ -69,11 +69,9 @@ class ControladorHoneynet(DynamicPolicy):
 		#Se determinara si el paquete recibido, es o no del tipo ARP"
 		if  tipoo == 2054:
 			print "paquete ARP "
-			a= pkt['raw']
-			print binascii.hexlify(socket.inet_aton(str(srcip)))
 			arp.ejecutarARP(pkt,self.network, self.IpPuerto,self.puertoHoneynet, self.IpMac, self.paqueteARP, self.IpMacAtacante)
 
-        		#Se determinara si el paquete recibido, es o no del tipo IP"
+        #Se determinara si el paquete recibido, es o no del tipo IP"
 		elif tipoo == 2048:
 			print "paquete IP "
 			try:
@@ -132,7 +130,7 @@ class ControladorHoneynet(DynamicPolicy):
 
 			except:	
 				print "Error con el paquete IP recibido...(diccionarios vacios)"
-				#enviar.enviar_ARP(pkt, self.network)
+				enviar.enviar_ARP(pkt, self.network)
 						
 			
 			
