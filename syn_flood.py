@@ -14,9 +14,7 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 from ConfigParser import ConfigParser
 
-config = ConfigParser()
-config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
-puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
+
 
 def syn_flood(pkt, network, IpPuerto, ListaAtacantes,ListaClientes,ListaSolicitudes):
 
@@ -40,7 +38,9 @@ def syn_flood(pkt, network, IpPuerto, ListaAtacantes,ListaClientes,ListaSolicitu
 	
 	
 def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):	
-
+	config = ConfigParser()
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
+	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	srcip  = pkt['srcip']        
 	dstip  = pkt['dstip']        
 	#Se obtiene  de un archivo de configuracion la ip del servidor 
@@ -68,13 +68,13 @@ def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal):
 					#Sin embargo se deja pasar un solo paquete paga obtener estadisticas
 					print "Revisar siguiente linea no se debe enviar todos los paquetes..."
 					#Al tratarse de un ataque le enviamos al puerto de la honeynet
-					enviar.enviar_paquete(pkt,network,puertoHoneynet)								
+					enviar.enviar_paquete(pkt,network,int(puertoHoneynet))								
 																					
 				#A continuacion se verifica que la direccion IP origen del segmento TCP recibido  se encuentre en la lista de atacantes
 				elif srcip in ListaAtacantes:
 					#Se envia el paquete a la honeynet 
 					print "Revisar  a donde se envia el paquete!!!"
-					enviar.enviar_paquete(pkt,network,puertoHoneynet)		
+					enviar.enviar_paquete(pkt,network,int(puertoHoneynet))		
 
 				#A continuacion se verifica que la direccion IP origen del segmento TCP recibido se encuentre en la lista de Clientes lejitimos
 				elif srcip in ListaClientes:

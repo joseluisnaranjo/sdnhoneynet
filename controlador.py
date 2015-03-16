@@ -70,7 +70,7 @@ class ControladorHoneynet(DynamicPolicy):
 		#Se determinara si el paquete recibido, es o no del tipo ARP"
 		if  tipoo == 2054:
 			print "paquete ARP "
-			arp.ejecutarARP(pkt,self.network, self.IpPuerto,int(self.puertoHoneynet), self.IpMac, self.paqueteARP, self.IpMacAtacante)
+			arp.ejecutarARP(pkt,self.network, self.IpPuerto, self.IpMac, self.paqueteARP, self.IpMacAtacante)
 			
 		#Se determinara si el paquete recibido, es o no del tipo IP"
 		elif tipoo == 2048:

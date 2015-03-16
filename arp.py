@@ -17,7 +17,7 @@ import controlador
 from ConfigParser import ConfigParser
 
 
-def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacAtacante):
+def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP, IpMacAtacante):
 	config = ConfigParser()
 	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion    
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
@@ -55,7 +55,7 @@ def ejecutarARP(pkt, network, IpPuerto,puertoHoneynet, IpMac, paqueteARP, IpMacA
 		#A continuacion se comprueba si esta en el diccionario de atacantes 
 		elif srcip in IpMacAtacante:
 			#Una ves que sabemos que esta en el diccionario de atacantes enviamos a la honeynet
-			tipoARP(pkt, network, puertoHoneynet)
+			tipoARP(pkt, network, int(puertoHoneynet))
 		
 		#Si no se encuentra en el diccionario IpMac quiere decir que es un cliente nuevo
 		else:
@@ -78,10 +78,9 @@ def tipoARP(pkt, network, puerto):
 	#Si el paquete ARP recibido, es una solicitud se procede a  reenviarlo por todos los puerto, escepto por el que llego.
 	if opcode == 1:
 
-		for port in network.topology.egress_locations() - {Location(switch,inport)}:
+		for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch,int(puertoHoneynet))}:
 			puerto = port.port_no					
-			if ((inport != puerto) and (puertoHoneynet != puerto)):
-				enviar.enviar_paquete(pkt,network,puerto)
+			enviar.enviar_paquete(pkt,network,puerto)
 	# Si el paquete recibido es una respuesta ARP se la enviara unicamente por el puerto en el quese encuentre la Ip destino.
 	elif opcode == 2:			
 		try: 
