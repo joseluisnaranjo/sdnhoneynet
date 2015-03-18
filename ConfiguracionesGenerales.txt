@@ -61,3 +61,46 @@ Configuracion estatica de una interfaz de red en Linux
 		ifconfig eth0 down
 		ifconfig eth0 hw ether 02:01:02:03:04:08
 		ifconfig eth0 up
+		
+		
+		
+		
+Configuracion del entorno de desarrollo:
+1.- Instalacion:
+	En un teminal de comandos digitar:
+ 		wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add - 
+   	       sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu $(lsb_release -sc)-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list
+ 		sudo apt-get update
+ 		sudo apt-get install pycharm
+ 	
+ 	En caso de error al instalr(no encunetra dependencias), digitar:
+ 
+ 		wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+ 		sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu trusty-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
+ 		sudo apt-get update
+ 		sudo apt-get install pycharm
+ 	
+ 	La aplicaion se ejecuta con:
+ 		sudo pycharm &
+ 		
+2.- Configuracion de la solucion que ejecuta Pyretic:
+	File --> Open --> Seleccionamos la carpeta /home/mininet , luego OK.
+	File --> Settings --> Proyect:Mininet -->ProjectStructure --> Seleccionamos als carperas: pox, mininet, pyretic,openflow y las procedemos
+	a marcar como sources dando clic en la carpetita azul de de la parte superior de ese mismo cuadro de dialogo.
+	* Realizar el siguiente paso solo si hay problema una vez que se corra la aplicaion:
+		(verificar que todas las carpetas contenidas en estas 4 esten marcadas de azul exepto: la carpeta pox q esta dentro de pox.)
+	Run --> EditConfigurations --> Llenamso los siguientes campos:
+		Name: pyretic
+		Script: /home/mininet/pyretic/pyretic.py
+		Script parameters: -m i sdnhoneynet.controlador
+		Python interpreter: (esta lleno por fedault, verificar que sea el 2.7, no editar)
+		Working directory: /home/mininet/pyretic 
+	Finalmente, damos cluc a OK.
+3.- Run or Debbug Pyretic
+	Ahora vamos a la pestaña RUN y seleccionamso al opcion deseada.
+	Nota:
+		En la barra interior  seleccionanado la pestaña DEBUG podemos luego seleccionar entre las pesatñas  Debbuger y console para ver lso resultados.
+		Podemos poner puntos de interrupcion en cualquier momento
+		No se puede correr la aplicaion y mininet en el mismo cpu
+		
+		
