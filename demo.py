@@ -43,9 +43,7 @@ class ControladorHoneynet(DynamicPolicy):
 		print "Se iniciara el constructor de la clase.."
 		self.query = packets()
 		self.remotes_ip = {}
-
 		self.IpMacAtacante = {}
-
 		self.query.register_callback(self.paquete)
 		self.network = None
 		super(ControladorHoneynet,self).__init__(self.query)
@@ -74,14 +72,14 @@ def ejecucion(pkt, network , puertoHoneynet, num):
 	    ctrl = ControladorHoneynet  
             #print "se a recibido el paquete numero = " + str(num)
             try:
-		switch = pkt['switch']
+				switch = pkt['switch']
             	inport = pkt['inport']
             	tipoo = pkt['ethtype']
             	srcmac = pkt['srcmac']
             	dstmac = pkt['dstmac']
             	opcode = pkt['protocol']
             	dstip = pkt['dstip']
-		srcip  = pkt['srcip']
+				srcip  = pkt['srcip']
             except:
 		print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 

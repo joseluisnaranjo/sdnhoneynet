@@ -45,8 +45,7 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 			while (num < 2):
 				#A continuacion se  extrae la ip que se envia como respuesta del dns 
 				ubicacion = lenURL + 142
-				
-				
+
 				'''
 				ipS_Respuestas = payload(pkt,ubicacion,lenPayload-1)
 				cadenaRespuestas = ipS_Respuestas.split('00010001')
@@ -55,9 +54,6 @@ def dns_spoofing(pkt,network,IpPuerto,identificador,lenURL,ListaDNS):
 					ipRespuesta[num][fila]=ip_Respuesta[14:21]
 					fila=fila+1
 				'''	
-				
-				
-				
 				ip_Respuesta[num] = payload(ListaDNS[num],ubicacion,lenPayload-1)	
 								
 				num = num + 1

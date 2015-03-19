@@ -35,8 +35,8 @@ def paqueteIP(pkt, network, IpPuerto,IpMac, Listas, puertoHoneynet):
 	else:
 		IpMac[srcip]=srcmac
 		for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
-					puerto = port.port_no
-					enviar.enviar_paquete(pkt,network,puerto)
+			puerto = port.port_no
+			enviar.enviar_paquete(pkt,network,puerto)
 
 	
 		
