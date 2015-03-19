@@ -21,8 +21,6 @@ import binascii
 import socket
 import syn_flood_andres
 
-
-
 def paqueteIP(pkt, network, IpPuerto,IpMac, Listas, puertoHoneynet):
 	srcip = pkt['srcip']
 	srcmac = pkt['srcmac']
