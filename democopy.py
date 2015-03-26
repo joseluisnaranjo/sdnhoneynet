@@ -23,7 +23,7 @@ import socket
 
 class ControladorHoneynet(DynamicPolicy):
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
+	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	ListaSolicitudes = []
 	ListaAtacantes = []
 	ListaClientes = []
@@ -77,7 +77,7 @@ def main():
 def ejecucion(pkt, network , puertoHoneynet, num):
             #print "se a recibido el paquete numero = " + str(num)
             try:
-		switch = pkt['switch']
+		        switch = pkt['switch']
             	inport = pkt['inport']
             	tipoo = pkt['ethtype']
             	srcmac = pkt['srcmac']

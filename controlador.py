@@ -37,7 +37,7 @@ class ControladorHoneynet(DynamicPolicy):
 	print "Ejecutando la aplicacion para el controlador de la Honeynet... "
 
 	def __init__(self):
-		print "Se iniciara el constructor de la clase.."
+
 		self.query = packets()
 		self.remotes_ip = {}
 		self.IpPuerto = {}

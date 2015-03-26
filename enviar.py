@@ -16,20 +16,35 @@ import socket
 import binascii
 from ConfigParser import ConfigParser
 
+def enviar_paquete1(paquete,network, num):
+    inport = paquete['inport']
+    switch = paquete['switch']
+    rp=Packet()
+    rp=paquete
+    for port in network.topology.egress_locations() - {Location(switch,inport)}:
+        puerto = port.port_no
+        print "puerto entrada = " + str(inport)
+        print "puerto switch = " + str(puerto)
+        rp=rp.modify(outport=puerto)
+        network.inject_packet(rp)
+        print "****************************************"
+        num=num+1
+
 def enviar_paquete(paquete,network,sending_port):
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion 
+	config.read("honeynet.cfg")
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
-	puertoLAN = config.get("PUERTOS","puertoLAN")
-	inport = pkt['inport']
-	outport = pkt['outport']
+	puertoLAN = config.get("PUERTOS","puertolan")
+	inport = paquete['inport']
+	outport = sending_port
 
 	 	
 	try:
 		"""Construct an arp packet from scratch and send"""
-		print "Ejecutando senvio de paquete.."
+		print "Ejecutando envio de paquete.."
 		rp = Packet()
 		rp = paquete
+
 		rp = rp.modify(outport = sending_port)
 		if (((inport != int(puertoLAN)) or (outport != int(puertoHoneynet))) and ((inport != int(puertoHoneynet)) or (outport != int(puertoLAN)))):		
 			network.inject_packet(rp)
@@ -40,7 +55,7 @@ def enviar_paquete(paquete,network,sending_port):
 
 def enviar_RARP(paquete,network):
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion 
+	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	"""Construct an arp packet from scratch and send"""
 	print "Ejecutando senvio de paquete.."
@@ -61,7 +76,7 @@ def enviar_RARP(paquete,network):
 			
 def enviar_ARP(paquete,network):
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion 
+	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	"""Construct an arp packet from scratch and send"""
 	print "Ejecutando senvio de paquete.."

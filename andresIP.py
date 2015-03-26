@@ -28,12 +28,14 @@ def paqueteIP(pkt, network, IpPuerto,IpMac, Listas, puertoHoneynet):
 	srcmac = pkt['srcmac']
 	switch = pkt['switch']
 	inport = pkt['inport']
+	dstport = pkt['dstport']
 
 	if srcip in IpMac:
 		if IpMac[srcip] == srcmac:
 			syn_flood_andres.syn_flood(pkt, network, IpPuerto, IpMac, Listas)
 		else:
-			print "Cambio la MAC"
+			comando = "hping3 -1 " + dstport + "-a 192.168.0.1"  
+			ping = os.system(comando)
 	else:
 		IpMac[srcip]=srcmac
 		for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:

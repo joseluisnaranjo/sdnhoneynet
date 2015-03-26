@@ -42,7 +42,7 @@ def comprobarFlags(pkt,network,IpPuerto,flag,flagInicial,flagFinal,Listas):
 	ListaClientes = Listas[1]
 	ListaSolicitudes = Listas[2]	
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
+	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	srcip  = pkt['srcip']        
 	dstip  = pkt['dstip']        

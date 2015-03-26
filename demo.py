@@ -24,7 +24,7 @@ import andresIP
 
 class ControladorHoneynet(DynamicPolicy):
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
+	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	ListaSolicitudes = []
 	ListaAtacantes = []
 	ListaClientes = []
@@ -43,9 +43,7 @@ class ControladorHoneynet(DynamicPolicy):
 		print "Se iniciara el constructor de la clase.."
 		self.query = packets()
 		self.remotes_ip = {}
-
 		self.IpMacAtacante = {}
-
 		self.query.register_callback(self.paquete)
 		self.network = None
 		super(ControladorHoneynet,self).__init__(self.query)
@@ -93,7 +91,7 @@ def ejecucion(pkt, network , puertoHoneynet, num):
 				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
 					puerto = port.port_no
 					print "puerto entrada = " + str(inport)
-					print "puerto switch = " + str(puerto)
+					print "bbbbbbbbpuerto switch = " + str(puerto)
 					enviar.enviar_paquete(pkt,network,puerto)
 					print "****************************************"
 

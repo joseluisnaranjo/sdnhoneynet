@@ -19,7 +19,7 @@ from ConfigParser import ConfigParser
 
 def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP, IpMacAtacante):
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion    
+	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	inport = pkt['inport']
 	srcip  = pkt['srcip']        
@@ -69,7 +69,7 @@ def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP, IpMacAtacante):
 
 def tipoARP(pkt, network, puerto):
 	config = ConfigParser()
-	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion    
+	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
 	switch = pkt['switch']
 	opcode = pkt['protocol']
