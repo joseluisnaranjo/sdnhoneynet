@@ -21,8 +21,6 @@ import binascii
 import socket
 import syn_flood_andres
 
-
-
 def paqueteIP(pkt, network, IpPuerto,IpMac, Listas, puertoHoneynet):
 	srcip = pkt['srcip']
 	srcmac = pkt['srcmac']
@@ -34,13 +32,18 @@ def paqueteIP(pkt, network, IpPuerto,IpMac, Listas, puertoHoneynet):
 		if IpMac[srcip] == srcmac:
 			syn_flood_andres.syn_flood(pkt, network, IpPuerto, IpMac, Listas)
 		else:
+<<<<<<< HEAD
 			comando = "hping3 -1 " + dstport + "-a 192.168.0.1"  
 			ping = os.system(comando)
+=======
+			comandoIp = "ping -c 1 " + str(srcip)
+			ping_Ip = os.system(comandoIp)
+>>>>>>> 94431146b7631208099f15260602a3555f5743fd
 	else:
 		IpMac[srcip]=srcmac
 		for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
-					puerto = port.port_no
-					enviar.enviar_paquete(pkt,network,puerto)
+			puerto = port.port_no
+			enviar.enviar_paquete(pkt,network,puerto)
 
 	
 		
