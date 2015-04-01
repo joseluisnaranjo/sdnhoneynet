@@ -7,61 +7,65 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
-import collections
-import enviar
-from pyretic.lib.corelib import *
-from pyretic.lib.std import *
-from pyretic.lib.query import *
 from ConfigParser import ConfigParser
 
-
-
-def syn_flood(pkt, ListaAtacantes,ListaClientes,ListaSolicitudes):
+def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes):
     config = ConfigParser()
     config.read("honeynet.cfg")
     ipServidor = config.get("SYNFLOOD","ipServidor")
     tamano_max_listasolicitudes = config.get("SYNFLOOD","tamano")
     srcip  = pkt['srcip']
-    tcp_flags = payload(pkt,94,96)
+    tcp_flags = payload(pkt, 94, 96)
 
     if ipServidor == srcip:
         print "Enviar al proceso 2..."
+        return "THC"
     else:
-        if str(tcp_flags) == "02" :
+        if str(tcp_flags) == "02":
             if srcip in ListaAtacantes:
                 print "Enviar ala Honeynet..."
+                return "HONEYNEY"
+
             else:
                 if srcip in ListaSolicitudes :
                     ListaSolicitudes.remove(srcip)
                     ListaAtacantes.append(srcip)
                     print "Enviar ala Honeynet..."
+                    return "HONEYNEY"
                 else:
                     if srcip in ListaClientes:
                         print "Enviar al proceso 2..."
+                        return "THC"
                     else:
                         if len(ListaSolicitudes) < tamano_max_listasolicitudes :
                             ListaSolicitudes.append(srcip)
                             print "Enviar al proceso 2..."
+                            return "THC"
                         else:
                             ListaAtacantes.append(ListaSolicitudes[0])
                             del ListaSolicitudes[0]
                             ListaSolicitudes.append(srcip)
                             print "Enviar al proceso 2 ..."
+                            return "THC"
         else:
-            if str(tcp_flags)== "10":
+            if str(tcp_flags) == "10":
                 if srcip in ListaSolicitudes:
                     ListaSolicitudes.remove(srcip)
                     ListaClientes.append(srcip)
                     print "Enviar al proceso 2..."
+                    return "THC"
                 else:
                     if srcip in ListaAtacantes:
-                         ListaSolicitudes.remove(srcip)
+                         ListaAtacantes.remove(srcip)
                          ListaClientes.append(srcip)
                          print "Enviar al proceso 2..."
+                         return "THC"
                     else:
                         print "Enviar al proceso 2..."
+                        return "THC"
             else:
                 print "Enviar al proceso 2..."
+                return "THC"
 
 		
 def payload(pkt,num1,num2):	

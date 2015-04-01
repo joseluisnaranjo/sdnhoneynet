@@ -7,24 +7,13 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
-import collections
 import enviar
-import os
-from pyretic.lib.corelib import *
-from pyretic.lib.std import *
-from pyretic.lib.query import *
-
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
 config.read("honeynet.cfg")
 
-def manejadorArp(pkt, red, switch):
+def manejadorArp(pkt, red):
     print "paquete arp"
-    inport = pkt['inport']
-    for port in red.topology.egress_locations() - {Location(switch, inport)}:
-        puerto = port.port_no
-        print "puerto entrada = " + str(inport)
-        print "puerto switch = " + str(puerto)
-        enviar.enviar_paquete(pkt,red,puerto)
-        print "****************************************"
+    enviar.enviar_paquete(pkt,red)
+    print "****************************************"

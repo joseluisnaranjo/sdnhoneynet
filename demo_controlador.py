@@ -8,14 +8,12 @@
 ###################################################################################
 #Nuevo comentario
 import collections
-import syn_flood
-import enviar
+import demo_syn_flood
 import demo_protocolo_ip
+import enviar
 import demo_protocolo_arp
-import dns_spoofing
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
-
 from pyretic.lib.query import *
 from ConfigParser import ConfigParser
 import os
@@ -24,71 +22,146 @@ import socket
 
 
 class ControladorHoneynet(DynamicPolicy):
-    IpMac = {}
-    lstMacAtacante = []
-    lstSrcMac = []
-    Paquete = Packet()
-    num = 0
     config = ConfigParser()
     config.read("honeynet.cfg")
-
-
+    IpPuerto = {}
+    IpMac = {}
+    Paquete = Packet()
+    lstSrcMac = []
+    lstMacAtacante = []
+    ListaSolicitudes = []
+    ListaAtacantes = []
+    ListaClientes = []
+    ListaRARP = []
+    ListaDNS = []
+    paqueteARP = Packet()
+    identificador = ""
+    lenURL = 0
+    num = 0
+    puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
     print "Ejecutando la aplicacion para el controlador de la Honeynet... "
+
     def __init__(self):
-        print "Se iniciara el constructor de la clase.."
+		print "Se iniciara el constructor de la clase.."
+		self.query = packets()
+		self.remotes_ip = {}
+		self.IpPuerto = {}
+		self.IpMac = {}
+		self.IpMacAtacante = {}
 
-        # Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
-        IpMac = {}
-        IpPaquete = {}
-        ListaSolicitudes = []
-        ListaAtacantes = []
-        ListaClientes = []
-        ListaRARP = []
-        ListaDNS = []
-        paqueteARP = Packet()
-
-
-        self.query = packets()
-        self.remotes_ip = {}
-        self.query.register_callback(self.paquete)
-        self.network = None
-        super(ControladorHoneynet, self).__init__(self.query)
-        print "Ha terminado la ejecucion del constructor.."
-
+		self.query.register_callback(self.paquete)
+		self.network = None
+		super(ControladorHoneynet,self).__init__(self.query)
+		print "Ha terminado la ejecucion del constructor.."
     def set_network(self, network):
-        self.network = network
+		self.network = network
 
-    def paquete(self, pkt):
-        try:
-            tipoPkt = pkt['ethtype']
-            red = self.network
-            switch = pkt['switch']
+    def paquete(self,pkt):
+            #tipoPkt = ""
+            #red = self.network
 
-        except:
-		    print "%%%%%%%%%%%%%%%%%%%%"
+            try:
+                tipoPkt = pkt['ethtype']
+                inport = pkt['inport']
+                srcip  = pkt['srcip']
+                dstip = pkt['dstip']
+                red = self.network
+                dstmac = pkt['dstmac']
 
 
-        if tipoPkt == 2054:
+            except:
+		        print "%%%%%%%%%%%%%%%%%%%%"
+            if tipoPkt == 2054:
+                demo_protocolo_arp.manejadorArp(pkt, red)
 
-             demo_protocolo_arp.manejadorArp(pkt, red, switch)
+            elif tipoPkt == 2048:
+                proceso = demo_protocolo_ip.manejadorIp(pkt, red, self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)
+                if proceso == "TCP":
+                    proceso = demo_syn_flood.tcp_syn_flood(pkt, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes )
+                    if proceso== "THC":
+                        print("llamar al archivo ssl")
+                        enviar.enviar_paquete(pkt, red)
+                    elif proceso == "HONEYNEY":
+                        print("enviar al honeynet")
+                        enviar.enviar_Honeynet(pkt, red)
+                elif proceso == "UDP":
+                    print("llamar al dns_spoofing")
+                    enviar.enviar_paquete(pkt, red)
+                elif proceso == "HONEYNET":
+                    print("enviar al honeynet")
+                    enviar.enviar_Honeynet(pkt, red)
 
-        elif tipoPkt == 2048:
-            demo_protocolo_ip.manejadorIp(pkt, red, self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)
-        else:
-            manejadorProtocolos(pkt, red, switch)
+            else:
+                #manejadorProtocolos(pkt, red)
+                #enviar.enviar_paquete(pkt, red)
+                print "Paquete desconocido"
 
-        print "se ha recibido el paquete numero = " + str(self.num)
+            print "se ha recibido el paquete numero = " + str(self.num)
+
+
 
 
 def main():
 	#print "Ejecutando main.."
 	return ControladorHoneynet()
 
+def send(rp,network, IpPuerto):
+    dstip = rp['dstip']
+    rp = rp.modify(outport=int(IpPuerto[dstip]))
+    network.inject_packet(rp)
+    print "Paquete enviado exitosamente!!..."
 
-def manejadorProtocolos(pkt):
-    print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    print "Paquetes desconocidos "
-    inport = pkt['inport']
-    print "puerto entrada = " + str(inport)
-    print "???????????????????????????????????????????????"
+
+
+
+
+def manejadorProtocolos(rp,network, IpPuerto):
+    dstip = rp['dstip']
+    rp = rp.modify(outport=int(IpPuerto[dstip]))
+    network.inject_packet(rp)
+    print "Paquete enviado exitosamente!!..."
+
+def ejecucion(pkt, network , puertoBloqueado, num):
+            #print "se a recibido el paquete numero = " + str(num)
+            try:
+                switch = pkt['switch']
+            	inport = pkt['inport']
+            	tipoo = pkt['ethtype']
+            	srcmac = pkt['srcmac']
+            	dstmac = pkt['dstmac']
+            	opcode = pkt['protocol']
+            	dstip = pkt['dstip']
+                srcip  = pkt['srcip']
+            except:
+                print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+            if  tipoo == 2054:
+				print "paquete arp"
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoBloqueado)}:
+					puerto = port.port_no
+					print "puerto entrada = " + str(inport)
+					print "puerto switch = " + str(puerto)
+					enviar.enviar_paquete(pkt,network,puerto)
+					print "****************************************"
+				ControladorHoneynet.num=ControladorHoneynet.num+1
+
+            elif tipoo == 2048:
+				print "paquete IP "
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoBloqueado)}:
+					puerto = port.port_no
+					print "puerto entrada = " + str(inport)
+					print "puerto switch = " + str(puerto)
+					enviar.enviar_paquete(pkt,network,puerto)
+					print "//////////////////////////////////////"
+				ControladorHoneynet.num=ControladorHoneynet.num+1
+            else:
+				print "Paquetes desconocidos "
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoBloqueado)}:
+					puerto = port.port_no
+					print "puerto entrada = " + str(inport)
+					print "puerto switch = " + str(puerto)
+					enviar.enviar_paquete(pkt,network,puerto)
+					print "???????????????????????????????????????????????"
+
+				num=num+1
 
