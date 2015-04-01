@@ -23,7 +23,7 @@ import socket
 
 class ControladorHoneynet(DynamicPolicy):
 	config = ConfigParser()
-	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
+	config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	ListaSolicitudes = []
 	ListaAtacantes = []
 	ListaClientes = []
@@ -55,42 +55,54 @@ class ControladorHoneynet(DynamicPolicy):
 
 
 	def paquete(self,pkt):
+            try:
+                tipoPkt = pkt['ethtype']
+                inport = pkt['inport']
+                srcip  = pkt['srcip']
+                dstip = pkt['dstip']
+                red = self.network
+                dstmac = pkt['dstmac']
 
-            inport = pkt['inport']
-            if self.num < 100:
-                if inport != int(self.puertoHoneynet):
-                    a = self.network
-                    b = int(self.puertoHoneynet)
-                    #c = self.num
-                    ejecucion(pkt, a,b, self.num)
-		    print "se a recibido el paquete numero = " + str(self.num)
+
+            except:
+		        print "%%%%%%%%%%%%%%%%%%%%"
+
+            if (self.IpPuerto.has_key(dstip)):
+                send (pkt, self.network, self.IpPuerto)
             else:
-		    a = self.network                    
-                    b = 1
-                    ejecucion(pkt, a, b, self.num)
-		    print "se a recibido el paquete numero = " + str(self.num)
+                self.IpPuerto[srcip] = inport
+                flood()
+
+
 
 def main():
 	#print "Ejecutando main.."
 	return ControladorHoneynet()
 
-def ejecucion(pkt, network , puertoHoneynet, num):
+def send(rp,network, IpPuerto):
+    dstip = rp['dstip']
+    rp = rp.modify(outport=int(IpPuerto[dstip]))
+    network.inject_packet(rp)
+    print "Paquete enviado exitosamente!!..."
+
+
+def ejecucion(pkt, network , puertoBloqueado, num):
             #print "se a recibido el paquete numero = " + str(num)
             try:
-		        switch = pkt['switch']
+                switch = pkt['switch']
             	inport = pkt['inport']
             	tipoo = pkt['ethtype']
             	srcmac = pkt['srcmac']
             	dstmac = pkt['dstmac']
             	opcode = pkt['protocol']
             	dstip = pkt['dstip']
-		srcip  = pkt['srcip']
+                srcip  = pkt['srcip']
             except:
-		print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+                print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 
             if  tipoo == 2054:
 				print "paquete arp"
-				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoBloqueado)}:
 					puerto = port.port_no
 					print "puerto entrada = " + str(inport)
 					print "puerto switch = " + str(puerto)
@@ -100,7 +112,7 @@ def ejecucion(pkt, network , puertoHoneynet, num):
 
             elif tipoo == 2048:
 				print "paquete IP "
-				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoBloqueado)}:
 					puerto = port.port_no
 					print "puerto entrada = " + str(inport)
 					print "puerto switch = " + str(puerto)
@@ -109,7 +121,7 @@ def ejecucion(pkt, network , puertoHoneynet, num):
 				ControladorHoneynet.num=ControladorHoneynet.num+1
             else:
 				print "Paquetes desconocidos "
-				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoHoneynet)}:
+				for port in network.topology.egress_locations() - {Location(switch,inport)} - {Location(switch, puertoBloqueado)}:
 					puerto = port.port_no
 					print "puerto entrada = " + str(inport)
 					print "puerto switch = " + str(puerto)
