@@ -7,7 +7,7 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
-import enviar
+import demo_enviar as enviar
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
@@ -15,5 +15,5 @@ config.read("honeynet.cfg")
 
 def manejadorArp(pkt, red):
     print "paquete arp"
-    enviar.enviar_paquete(pkt,red)
+    enviar.enviar(pkt,red)
     print "****************************************"

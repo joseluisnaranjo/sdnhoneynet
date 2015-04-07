@@ -18,7 +18,9 @@ from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
 from ConfigParser import ConfigParser
-import thread
+import os
+import binascii
+import socket
 
 
 class ControladorHoneynet(DynamicPolicy):
@@ -74,39 +76,7 @@ class ControladorHoneynet(DynamicPolicy):
             except:
 		        print "%%%%%%%%%%%%%%%%%%%%"
 
-
-
-            if tipoPkt == 2054:
-                if dstip != IPAddr('192.168.0.1'):
-                    demo_protocolo_arp.manejadorArp(pkt, red)
-
-
-            elif tipoPkt == 2048:
-                if dstmac != EthAddr('ff:ff:ff:ff:ff:ff'):
-                    proceso = demo_protocolo_ip.manejadorIp(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)
-                    if proceso == "TCP":
-                        proceso = demo_syn_flood.tcp_syn_flood(pkt, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes )
-                        if proceso== "THC":
-                            print("llamar al archivo ssl")
-                            demo_thc_ssl_dos.thc_ssl_dos(red,pkt,self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT)
-                        elif proceso == "HONEYNEY":
-                            print("enviar al honeynet")
-                            enviar.enviar_Honeynet(pkt, red)
-                    elif proceso == "UDP":
-                        print("llamar al dns_spoofing")
-                        demo_dns_spoofing.dns_spoofing(pkt, red)
-                    elif proceso == "HONEYNET":
-                        print("enviar al honeynet")
-                        enviar.enviar_Honeynet(pkt, red)
-
-
-
-            else:
-                #manejadorProtocolos(pkt, red)
-                #enviar.enviar_paquete(pkt, red)
-                print "Paquete desconocido"
-
-                #print "se ha recibido el paquete numero = " + str(self.num)
+            send (pkt, self.network)
 
 
 
@@ -115,11 +85,18 @@ def main():
 	#print "Ejecutando main.."
 	return ControladorHoneynet()
 
-'''def send(rp,network, IpPuerto):
-    dstip = rp['dstip']
-    rp = rp.modify(outport=int(IpPuerto[dstip]))
-    network.inject_packet(rp)
-    print "Paquete enviado exitosamente!!..."
+ip=IPAddr('192.168.0.255')
+def policy():
+    return (match(srcip=ip)>>drop)
+
+
+def send(rp,network):
+    for port in network.topology.egress_locations():
+        puerto = port.port_no
+        rp = rp.modify(outport=puerto)
+        network.inject_packet(rp)
+        print "Paquete enviado exitosamente!!..."
+
 
 
 
@@ -173,5 +150,5 @@ def ejecucion(pkt, network , puertoBloqueado, num):
 					enviar.enviar_paquete(pkt,network,puerto)
 					print "???????????????????????????????????????????????"
 
-				num=num+1'''
+				num=num+1
 

@@ -17,8 +17,7 @@ config = ConfigParser()
 config.read("honeynet.cfg")
 respuesta = ""
 
-
-def manejadorIp(pkt, red,  IpMac, paquete, lstSrcMac, lstMacAtacante):
+def manejadorIp(pkt, IpMac, paquete, lstSrcMac, lstMacAtacante):
     print "paquete IP "
     ipGateway = config.get("IP_SPOOFING", "ipGateway")
     ipBroadcast = IPAddr('192.168.0.255')
@@ -27,10 +26,9 @@ def manejadorIp(pkt, red,  IpMac, paquete, lstSrcMac, lstMacAtacante):
     dstip = pkt['dstip']
     srcmac = pkt['srcmac']
 
-
     of_payload_code = pkt['raw']
     of_payload = of_payload_code.encode("hex")
-    icmp_replay =str(of_payload[68:70])
+    icmp_replay = str(of_payload[68:70])
 
     if protocolo == 1:
         print "Paquete ICMP"
@@ -40,7 +38,7 @@ def manejadorIp(pkt, red,  IpMac, paquete, lstSrcMac, lstMacAtacante):
             respuesta = "HONEYNET"
 
         else:
-            if ((icmp_replay== "00" ) and (srcip==ipGateway)):
+            if ((icmp_replay == "00" ) and (srcip == ipGateway)):
                 lstSrcMac.append(srcmac)
                 time.sleep(1)
                 if (len(lstSrcMac)>1):
@@ -52,53 +50,52 @@ def manejadorIp(pkt, red,  IpMac, paquete, lstSrcMac, lstMacAtacante):
                             print ("Enviar a la honeynet")
                             respuesta = "HONEYNET"
 
-
                         else :
                             respuesta = ""
-                else :
-                    IpMac[srcip]  = srcmac
+                else:
+                    IpMac[srcip] = srcmac
                     lstSrcMac.clear()
                     paquete = Packet()
                     print ("Enviar al proceso 1...")
                     respuesta = "TCP"
 
-            else :
-                respuesta =   verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
+            else:
+                respuesta = verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
     elif protocolo == 17:
         respuesta = "UDP"
 
-    else :
-        respuesta =  verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
+    else:
+        respuesta = verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
 
     return respuesta
 
 
 def verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante):
     srcmac = pkt['srcmac']
-    srcip  = pkt['srcip']
+    srcip = pkt['srcip']
 
     if (srcmac in lstMacAtacante):
         print ("Enviar a la honeynet")
         return "HONEYNET"
 
-    else :
+    else:
         if (IpMac.has_key(srcip)):
             if (IpMac[srcip]== srcmac):
                 print ("Paquete conocido... Enviar paquete al proceso 1...")
                 return "TCP"
 
-
-            else :
+            else:
                 if (paquete == Packet()):
-                    print ("Enviar un ping a: " + str(pkt[srcip]))
+                    print ("Enviar un ping a: " + str(pkt['srcip']))
                     paquete = pkt
-                    comando = "hping3 -1 " + str(srcip) + " -a " + str(ipGateway)
+                    comando = "sudo hping3 -1 " + str(srcip) + " -a " + str(ipGateway)
+                    print comando
                     os.system(comando)
                     return ""
-                else :
+                else:
                     return ""
-        else :
-            IpMac[srcip]  = srcmac
+        else:
+            IpMac[srcip] = srcmac
             print("Paquete nuevo...Enviar al proceso 1...")
             return "TCP"
 
