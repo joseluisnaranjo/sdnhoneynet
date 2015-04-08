@@ -8,7 +8,7 @@
 ###################################################################################
 
 from ConfigParser import ConfigParser
-import demo_enviar as enviar
+import enviar
 def thc_ssl_dos(red, pkt, ListaAtacantes, ListaClientes, ListaSolicitudes):
     config = ConfigParser()
     config.read("honeynet.cfg")

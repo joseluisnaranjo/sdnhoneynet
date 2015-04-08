@@ -7,7 +7,7 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
-import demo_enviar as enviar
+import enviar
 from ConfigParser import ConfigParser
 
 config = ConfigParser()

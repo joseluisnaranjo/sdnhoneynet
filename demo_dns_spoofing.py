@@ -7,11 +7,7 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
-import collections
-import demo_enviar as enviar
-from pyretic.lib.corelib import *
-from pyretic.lib.std import *
-from pyretic.lib.query import *
+import enviar
 from ConfigParser import ConfigParser
 
 config = ConfigParser()
