@@ -34,7 +34,8 @@ class ControladorHoneynet(DynamicPolicy):
     ListaClientesT = []
     ListaRARP = []
     ListaDNS = []
-    IpNum = {}
+    IpNumS = {}
+    IpNumC = {}
     paqueteARP = Packet()
     identificador = ""
     lenURL = 0
@@ -61,10 +62,12 @@ class ControladorHoneynet(DynamicPolicy):
 
             try:
                 tipoPkt = pkt['ethtype']
-                dstip = pkt['dstip']
                 red = self.network
+                dstip = pkt['dstip']
+                protocolo = pkt['protocol']
                 dstport = pkt['dstport']
                 srcport = pkt['srcport']
+
             except:
 		        print "%%%%%%%%%%%%%%%%%%%%"
 
@@ -74,10 +77,12 @@ class ControladorHoneynet(DynamicPolicy):
 
             elif tipoPkt == 2048:
                 try:
-                    if dstport == 443 or srcport == 443:
-                        thc_ssl_dos.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNum)
-                    else:
+                    if protocolo == 6:
                         enviar.enviar_paquete(pkt,red)
+                        if dstport == 443 or srcport == 443:
+                            thc_ssl_dos.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
+                        else:
+                            enviar.enviar_paquete(pkt,red)
                     '''if (dstmac != EthAddr('ff:ff:ff:ff:ff:ff') or (dstip != IPAddr('239.255.255.250'))):
                         proceso = protocolo_ip.manejadorIp(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)
                         if proceso == "TCP":
