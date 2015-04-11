@@ -10,7 +10,9 @@
 from pyretic.lib.corelib import *
 from ConfigParser import ConfigParser
 import enviar
+
 def thc_ssl_dos(red, pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumC, IpNumS):
+
     config = ConfigParser()
     config.read("honeynet.cfg")
     ipServidor = config.get("SYNFLOOD", "ipServidor")
@@ -19,14 +21,14 @@ def thc_ssl_dos(red, pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNum
     srcip  = pkt['srcip']
     dstip  = pkt['dstip']
 
-    ssl_flags = payload(pkt, 142, 144)
-    ssl_datos = payload(pkt, 132, 134)
+    ssl_flags1= payload(pkt, 118, 120)
+    ssl_flags2 = payload(pkt, 142, 144)
+    ssl_dato1 = payload(pkt, 108, 110)
+    ssl_dato2 = payload(pkt, 132, 134)
 
-
-
-    if str(ssl_flags) == "01":
+    if (str(ssl_flags1) == "01") or (str(ssl_flags2) == "01"):
         if srcip == IPAddr(ipServidor):
-            enviar.enviar_paquete(pkt,red)
+            enviar.enviar_paquete(pkt, red)
         else:
                 if srcip in ListaAtacantes:
                     print "Enviar ala Honeynet..."
@@ -79,7 +81,7 @@ def thc_ssl_dos(red, pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNum
                                 print "Enviar a la LAN..."
                                 enviar.enviar_paquete(pkt, red)
     else:
-                if str(ssl_datos) == "17":
+                if (str(ssl_dato1) == "17") or (str(ssl_dato2) == "17"):
                     if dstip in ListaSolicitudes:
                         ListaSolicitudes.remove(dstip)
                         ListaClientes.append(dstip)
@@ -98,6 +100,12 @@ def thc_ssl_dos(red, pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNum
                             if dstip in ListaClientes:
                                 print "Enviar a la LAN..."
                                 enviar.enviar_paquete(pkt, red)
+                            else:
+                                if srcip in ListaAtacantes:
+                                    enviar.enviar_Honeynet(pkt, red)
+                                else:
+                                    enviar.enviar_paquete(pkt, red)
+
                 else:
                     if srcip in ListaAtacantes:
                         enviar.enviar_Honeynet(pkt,red)
@@ -109,7 +117,6 @@ def thc_ssl_dos(red, pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNum
 def payload(pkt,num1,num2):
     of_payload_code = pkt['raw']
     of_payload = of_payload_code.encode("hex")
-    print of_payload
     return of_payload[num1:num2]
 
 

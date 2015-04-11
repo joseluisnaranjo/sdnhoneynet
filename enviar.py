@@ -29,7 +29,7 @@ def enviar_Honeynet(paquete, network):
     switch = paquete['switch']
     paquete = paquete.modify(outport=puertoHoneynet)
     network.inject_packet(paquete)
-    print "Paquete enviado  a al HONEYNET exitosamente!!..."
+    print "Paquete enviado a al HONEYNET exitosamente!!..."
 
 #Prohibido Modificar
 def send(rp,network):

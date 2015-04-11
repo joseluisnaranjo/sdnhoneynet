@@ -40,7 +40,7 @@ def manejadorIp(pkt, IpMac, paquete, lstSrcMac, lstMacAtacante):
         else:
             if ((icmp_replay == "00" ) and (srcip == ipGateway)):
                 lstSrcMac.append(srcmac)
-                time.sleep(1)
+                time.sleep(5)
                 if (len(lstSrcMac)>1):
                     for i in lstSrcMac:
                         if i == paquete['srcmac']:
@@ -88,7 +88,7 @@ def verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante):
                 if (paquete == Packet()):
                     print ("Enviar un ping a: " + str(pkt['srcip']))
                     paquete = pkt
-                    comando = "sudo hping3 -1 " + str(srcip) + " -a " + str(ipGateway)
+                    comando = "sudo hping3 -1 -c 1" + str(srcip) + " -a " + str(ipGateway)
                     print comando
                     os.system(comando)
                     return ""

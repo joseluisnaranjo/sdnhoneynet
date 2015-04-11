@@ -36,6 +36,7 @@ class ControladorHoneynet(DynamicPolicy):
     ListaDNS = []
     IpNumS = {}
     IpNumC = {}
+    IpNum = {}
     paqueteARP = Packet()
     identificador = ""
     lenURL = 0
@@ -72,35 +73,30 @@ class ControladorHoneynet(DynamicPolicy):
 		        print "%%%%%%%%%%%%%%%%%%%%"
 
             if tipoPkt == 2054:
-                if dstip != IPAddr('192.168.0.1'):
-                    protocolo_arp.manejadorArp(pkt, red)
+                protocolo_arp.manejadorArp(pkt, red)
 
             elif tipoPkt == 2048:
-                try:
-                    if protocolo == 6:
-                        enviar.enviar_paquete(pkt,red)
-                        if dstport == 443 or srcport == 443:
-                            thc_ssl_dos.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
-                        else:
-                            enviar.enviar_paquete(pkt,red)
-                    '''if (dstmac != EthAddr('ff:ff:ff:ff:ff:ff') or (dstip != IPAddr('239.255.255.250'))):
-                        proceso = protocolo_ip.manejadorIp(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)
-                        if proceso == "TCP":
-                            proceso = syn_flood.tcp_syn_flood(pkt, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes, self.IpNum)
+                    proceso = protocolo_ip.manejadorIp(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)
+                    if proceso == "TCP":
+                        if protocolo == 6:
+                            proceso = syn_flood.tcp_syn_flood(pkt, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes, self.IpNum )
                             if proceso== "THC":
                                 print("llamar al archivo ssl")
-                                thc_ssl_dos.thc_ssl_dos(red,pkt,self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNum)
+                                if dstport == 443 or srcport == 443:
+                                    thc_ssl_dos.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
+                                else:
+                                    enviar.enviar_paquete(pkt, red)
                             elif proceso == "HONEYNEY":
                                 print("enviar al honeynet")
                                 enviar.enviar_Honeynet(pkt, red)
-                        elif proceso == "UDP":
-                            print("llamar al dns_spoofing")
-                            dns_spoofing.dns_spoofing(pkt, red)
-                        elif proceso == "HONEYNET":
-                            print("enviar al honeynet")
-                            enviar.enviar_Honeynet(pkt, red)'''
-                except:
-                    enviar.enviar_paquete(pkt,red)
+                        else:
+                            enviar.enviar_paquete(pkt, red)
+                    elif proceso == "UDP":
+                        print("llamar al dns_spoofing")
+                        dns_spoofing.dns_spoofing(pkt, red)
+                    elif proceso == "HONEYNET":
+                        print("enviar al honeynet")
+                        enviar.enviar_Honeynet(pkt, red)
 
             else:
                 print "Paquete desconocido"
