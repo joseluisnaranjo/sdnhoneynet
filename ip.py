@@ -17,7 +17,7 @@ config = ConfigParser()
 config.read("honeynet.cfg")
 respuesta = ""
 
-def manejadorIp(pkt, IpMac, paquete, lstSrcMac, lstMacAtacante):
+def ip_spoofing(pkt, IpMac, paquete, lstSrcMac, lstMacAtacante):
     print "paquete IP "
     ipGateway = config.get("IP_SPOOFING", "ipGateway")
     ipBroadcast = IPAddr('192.168.0.255')
@@ -30,42 +30,15 @@ def manejadorIp(pkt, IpMac, paquete, lstSrcMac, lstMacAtacante):
     of_payload = of_payload_code.encode("hex")
     icmp_replay = str(of_payload[68:70])
 
-    if protocolo == 1:
-        print "Paquete ICMP"
-
-        if (dstip == ipBroadcast):
-            print ("Enviar a la honeynet")
-            respuesta = "HONEYNET"
-
-        else:
-            if ((icmp_replay == "00" ) and (srcip == ipGateway)):
-                lstSrcMac.append(srcmac)
-                time.sleep(5)
-                if (len(lstSrcMac)>1):
-                    for i in lstSrcMac:
-                        if i == paquete['srcmac']:
-                            lstMacAtacante.append(paquete['srcmac'])
-                            lstSrcMac.clear()
-                            paquete = Packet()
-                            print ("Enviar a la honeynet")
-                            respuesta = "HONEYNET"
-
-                        else :
-                            respuesta = ""
-                else:
-                    IpMac[srcip] = srcmac
-                    lstSrcMac.clear()
-                    paquete = Packet()
-                    print ("Enviar al proceso 1...")
-                    respuesta = "TCP"
-
-            else:
-                respuesta = verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
+    if protocolo == 6:
+        respuesta = verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
+        
     elif protocolo == 17:
         respuesta = "UDP"
 
     else:
-        respuesta = verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
+        print "protocolo ip desconocido"
+        
 
     return respuesta
 
