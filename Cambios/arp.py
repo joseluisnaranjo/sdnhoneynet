@@ -17,7 +17,7 @@ import controlador
 from ConfigParser import ConfigParser
 
 
-def ejecutarARP(pkt, network, IpPuerto, IpMac, paqueteARP, IpMacAtacante):
+def arp_spoofing(pkt, network, IpPuerto, IpMac, paqueteARP, IpMacAtacante):
 	config = ConfigParser()
 	#config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
 	puertoHoneynet = config.get("PUERTOS","puertoHoneynet")

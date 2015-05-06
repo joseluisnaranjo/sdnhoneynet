@@ -1,0 +1,84 @@
+Como crear una topologia en mininet:
+  sudo mn --controller=remote --mac --topo single,3 
+
+Como  iniciar pyretic  con la cplicaoin del controlador de honeynet
+  estando en /pyretic  pyretic.py -m i sdnhoneynet.controlador
+  
+Como crear un servidor http en mininet( el servidor es h1)
+  h1 python -m SimpleHTTPServer 80 &
+  
+Como solicitar una paguina  al servidor http en mininnet( h2 solicita la pagina)
+  h2 wget -O - h1
+  
+Como clonar el repositorio  
+  sudo git clone https://github.com/joseluisnaranjo/sdnhoneynet
+  
+Como subir cambios desde Ubuntu al repositorio GITHUB
+  sudo git add  archivo.py
+  sudo git commit -m "Este es le comentario"
+  sudo git push
+  usuarioGIT
+  passwordGIT
+  
+Como remover el repositorio de Ubuntu
+  sudo rm -r sdnhoneynet
+
+Como configurar el openvswitch
+
+  Añadir un switch
+    ovs-vsctl add-br s1
+
+  Añadir un puerto al switch
+    ovs-vsctl add-port s1 eth0
+
+  Espicificar el controlador
+    ovs-vsctl set-controller br-int tcp:192.168.0.250:6633
+  sudo service openvswitch-controller stop
+  
+  
+Elimir tablas arp:
+  windows:
+    para ver las tablas arp: arp -a
+    para agregar una entrada arp: ARP -s 10.0.0.80 00-AA-00-4F-2A-9C
+    para borrar las tabals arp:  netsh interface ip delete arpcach
+    
+  Linux:
+    para ver las tablas arp: arp -n      ó:   ip neigh
+    para agregar una entrada arp: ARP -s 10.0.0.80 00-AA-00-4F-2A-9C
+    para borrar las tabals arp:  
+      por interfaz: sudo ip neigh flush dev eth0
+      por prefijo de red: sudo ip neigh flush to 10 ( borra todas alas IP que empiezan con 10)
+      por estado: sudo ip neigh flush nud reachable
+    
+    
+    
+Instalacion de entorno de desarrollo:
+  Agregamos el a ñadidor de repositorios:
+    sudo apt-get install software-properties-common python-software-properties
+
+  Agregamso los repositorios necesarios:
+    sudo apt-add-repository ppa:ninja-ide-developers/ninja-ide-stable (Stable updates)
+(OR)
+    sudo apt-add-repository ppa:ninja-ide-developers/daily (Daily updates)
+
+  sudo apt-get update
+  sudo apt-get install ninja-ide
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+Enlaces Utiles:
+
+  Arp Spoofing: http://linuxgnublog.org/envenamiento-de-las-tablas-arp-arp-spoofing
+
+
+  
+  hping3 -1 --flood -a 10.0.0.2 10.0.0.255

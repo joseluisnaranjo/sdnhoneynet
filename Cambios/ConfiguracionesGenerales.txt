@@ -1,0 +1,106 @@
+Configuracion maquina virtual Pyretic
+
+1.- Descargar de http://www.frenetic-lang.org/pyretic/ 
+	Official pre-packaged Pyretic VM (32-bit), la maquina de 64 bits no corre en VSphere en el servidor.
+2.- Se debe  descomprimir el archivo .zip e importarlo a vmware Desktop  antes de cargarlo al VShpere,
+	caso contrario no se abrira en el servidor.
+3.-	Una vez encendida la maquina, ya tiene habilitado  SSH, pero hay que habilitar el Xdisplay, para ello:
+	a) En el servidor, editar un el archivo de configuracion con el comando:
+		sudo nano /etc/ssh/ssh_config y modificar la opción: X11Forwarding yes
+	b) Nos conectamos usando SSH  y digitamos el comando : sudo nano /etc/apt/sources.list
+		Borramos todo el contenido del archivo y cargamos los repositorios obtenidos en :
+		http://www.espaciolinux.com/foros/software/repositorios-para-ubuntu-trusty-tahr-t52199.html
+		
+		Luego  digitamos, sudo apt-get update para actualizar los repositorios  y a continuacion:
+		sudo apt-get install gedit , este editor de texto nos facilitara el uso de los archivos.
+		
+	c) Para conectarnos con el servidor usando ssh y usando xdisplay :
+		windows: 
+			descargar y correr el programa: Xming
+			desdecargar y correr el PUTTY con las copciones siguinetes habilidas:
+				pestana Session colocar la IP y habilitar SSH
+				pestana Window, Color , habilitar la opcion Use system Color
+				Pestana connection, SSH, X11, habilitar la opcion Enable X11 forwarding.
+		Linux:
+			desde un terminal digitamos:
+			sudo ssh -X mininet@192.168.03.100,  donde la IP luego de @ es la del controlador
+			se deben poner las ocntraseñas pedidas.
+			
+Configuracion de pyretic para lanzar mi aplicaion por defecto:
+	 Se debe digitar el comando :
+	 	sudo gedit pyretic.py
+	 		Dentro del metodo;  def parseArgs():
+	 		la linea 88: op.set_defaults(frontend_only=False, mode='i')
+	 		antes de return del mismo metodo: 
+	 			args = ['sdnhoneynet.controlador']
+	 			kwargs_to_pass = {}
+	 		Dentro del metodo main():
+	 		antes del primer if:
+	 			op='-m'
+	 			options.mode='i'
+		
+Configuracion estatica de una interfaz de red en Linux
+
+	se debe editar el archivo de configuracion de interfaces:
+		sudo gedit /etc/network/interfaces
+	se debe remplazar  las lineas :
+		auto eth0
+		iface eth0 inet static
+	por:
+		auto eth0
+		iface eth0 inet static
+		address 192.168.0.100
+		network 192.168.0.0
+		netmask 255.255.255.0
+		broadcast 192.168.0.255
+		gateway 192.168.0.1
+	Finalmente, se debe reinicial el pc con:
+		sudo shutdown -P now  ó
+		sudo reboot -P now 
+	Para cambiar la direccion MAC
+		ifconfig eth0 down
+		ifconfig eth0 hw ether 02:01:02:03:04:08
+		ifconfig eth0 up
+		
+		
+		
+		
+Configuracion del entorno de desarrollo:
+1.- Instalacion:
+	En un teminal de comandos digitar:
+ 		wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add - 
+   	       sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu $(lsb_release -sc)-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list
+ 		sudo apt-get update
+ 		sudo apt-get install pycharm
+ 	
+ 	En caso de error al instalr(no encunetra dependencias), digitar:
+ 
+ 		wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+ 		sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu trusty-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
+ 		sudo apt-get update
+ 		sudo apt-get install pycharm
+ 	
+ 	La aplicaion se ejecuta con:
+ 		sudo pycharm &
+ 		
+2.- Configuracion de la solucion que ejecuta Pyretic:
+	File --> Open --> Seleccionamos la carpeta /home/mininet , luego OK.
+	File --> Settings --> Proyect:Mininet -->ProjectStructure --> Seleccionamos als carperas: pox, mininet, pyretic,openflow y las procedemos
+	a marcar como sources dando clic en la carpetita azul de de la parte superior de ese mismo cuadro de dialogo.
+	* Realizar el siguiente paso solo si hay problema una vez que se corra la aplicaion:
+		(verificar que todas las carpetas contenidas en estas 4 esten marcadas de azul exepto: la carpeta pox q esta dentro de pox.)
+	Run --> EditConfigurations --> Llenamso los siguientes campos:
+		Name: pyretic
+		Script: /home/mininet/pyretic/pyretic.py
+		Script parameters: -m i sdnhoneynet.controlador
+		Python interpreter: (esta lleno por fedault, verificar que sea el 2.7, no editar)
+		Working directory: /home/mininet/pyretic 
+	Finalmente, damos cluc a OK.
+3.- Run or Debbug Pyretic
+	Ahora vamos a la pestaña RUN y seleccionamso al opcion deseada.
+	Nota:
+		En la barra interior  seleccionanado la pestaña DEBUG podemos luego seleccionar entre las pesatñas  Debbuger y console para ver lso resultados.
+		Podemos poner puntos de interrupcion en cualquier momento
+		No se puede correr la aplicaion y mininet en el mismo cpu
+		
+		
