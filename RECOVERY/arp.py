@@ -14,21 +14,20 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 
 
-def arp_spoofing(pkt, lstARP):
+
+def arp_spoofing(pkt, red, lstARP):
 	protocolo = pkt['protocol']
 	dstip  = pkt['dstip']
 	#Si el paquete ARP recibido, es una solicitud 
 	if protocolo == 1:
-		lstARP.append(dstip)
-		respuesta = "LAN"
+		lstARP.add(dstip)
+		return LAN
 
 	# Si el paquete recibido es una respuesta ARP 
 	elif protocolo == 2:
 		if srcip in lstARP:
-			respuesta = "LAN"
+			return LAN
 		else:
-			respuesta = "HONEYNET" 
-			
-	return respuesta
-	
+			return HONEYNET
+		
 #Clase terminada  completamente... Revisar!!!!

@@ -9,87 +9,95 @@
 
 from ConfigParser import ConfigParser
 
-def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNum):
-    config = ConfigParser()
-    config.read("honeynet.cfg")
-    ipServidor = config.get("SYNFLOOD", "ipServidor")
-    num_max_conexiones = config.getint("SYNFLOOD", "num")
-    tamano_max_listasolicitudes = config.getint("SYNFLOOD", "tamano")
+def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNum, ipServidor, num_max_conexiones, tamano_max_listasolicitudes):
+
     srcip  = pkt['srcip']
     tcp_flags = payload(pkt, 94, 96)
 
     if ipServidor == srcip:
-        print "Enviar al proceso 2..."
-        return "THC"
+        print "Paquete legitimo"
+        respuesta  = "LAN"
     else:
         if str(tcp_flags) == "02":
             if srcip in ListaAtacantes:
-                print "Enviar ala Honeynet..."
-                return "HONEYNEY"
+                print "Paquete peligroso..."
+                respuesta  = "HONEYNEY"
 
             else:
                 if srcip in ListaSolicitudes:
-                    ListaSolicitudes.remove(srcip)
-                    ListaAtacantes.append(srcip)
-                    print "Enviar ala Honeynet..."
-                    return "HONEYNEY"
+                    if IpNumSOLT.has_key(srcip):
+						if IpNumSOLT[srcip] < num_max_conexiones:
+							IpNumSOLT[srcip] = IpNumSOLT[srcip] + 1
+							respuesta  = "LAN"
+						else:
+							ListaSolicitudes.remove(srcip)
+							ListaAtacantes.append(srcip)
+							del IpNumSOLT[srcip]
+							respuesta  = "HONEYNET"
+                    else:
+						IpNumSOLT[srcip] = 1
+						respuesta  = "LAN"					
+					
                 else:
                     if srcip in ListaClientes:
-                        if IpNum.has_key(srcip):
-                            if IpNum[srcip] < num_max_conexiones:
-                                IpNum[srcip] = IpNum[srcip] + 1
-                                return "THC"
+                        if IpNumCLIT.has_key(srcip):
+                            if IpNumCLIT[srcip] < num_max_conexiones:
+                                IpNumCLIT[srcip] = IpNumCLIT[srcip] + 1
+                                respuesta  = "LAN"
                             else:
                                 ListaClientes.remove(srcip)
                                 ListaAtacantes.append(srcip)
-                                del IpNum[srcip]
-                                return "HONEYNET"
+                                del IpNumCLIT[srcip]
+                                respuesta  = "HONEYNET"
                         else:
-                            IpNum[srcip] = 1
-                            return "THC"
+                            IpNumCLIT[srcip] = 1
+                            respuesta  = "LAN"
                     else:
                         if len(ListaSolicitudes) < tamano_max_listasolicitudes:
                             ListaSolicitudes.append(srcip)
-                            print "Enviar al proceso 2..."
-                            return "THC"
+                            print "Paquete legitimo......"
+                            respuesta  = "LAN"
                         else:
                             ListaAtacantes.append(ListaSolicitudes[0])
                             del ListaSolicitudes[0]
                             ListaSolicitudes.append(srcip)
-                            print "Enviar al proceso 2 ..."
-                            return "THC"
+                            print "Paquete legitimo... ..."
+                            respuesta  = "LAN"
         else:
             print str(tcp_flags)
             if str(tcp_flags) == "10":
                 if srcip in ListaSolicitudes:
                     ListaSolicitudes.remove(srcip)
                     ListaClientes.append(srcip)
-                    print "Enviar al proceso 2..."
-                    return "THC"
+					IpNumSOLT[srcip] = IpNumSOLT[srcip] - 1
+                    print "Paquete legitimo......"
+                    respuesta  = "LAN"
                 else:
                     if srcip in ListaAtacantes:
                          ListaAtacantes.remove(srcip)
                          ListaClientes.append(srcip)
-                         print "Enviar al proceso 2..."
-                         return "THC"
+                         print "Paquete legitimo......"
+                         respuesta  = "LAN"
                     else:
-                        print "Enviar al proceso 2..."
-                        return "THC"
+						if srcip in ListaClientes:
+							print "Paquete legitimo......"
+							respuesta  = "LAN"
             else:
                 if str(tcp_flags) == "11":
                     if srcip in ListaClientes:
-                        if IpNum.has_key(srcip):
-                            IpNum[srcip] = IpNum[srcip] - 1
-                    return "THC"
+                        if IpNumCLIT.has_key(srcip):
+                            IpNumCLIT[srcip] = IpNumCLIT[srcip] - 1
+                    respuesta  = "LAN"
                 else:
-                    print "Enviar al proceso 2..."
-                    return "THC"
-
+                    print "Paquete legitimo......"
+                    respuesta  = "LAN"
+					
+	return respuesta
 
 def payload(pkt,num1,num2):
 	of_payload_code = pkt['raw']
-	#A continucaion se codifica en hexadecimal dicho payload
 	of_payload = of_payload_code.encode("hex")
-	#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack
-	return of_payload[num1:num2]
+	respuesta  = of_payload[num1:num2]
 
+	
+#Clase terminada  completamente... Revisar!!!!

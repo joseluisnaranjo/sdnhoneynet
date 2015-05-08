@@ -1,4 +1,3 @@
-
 ###################################################################################
 #                        ESCUELA POLITECNICA NACIONAL                             #
 # ------------------------------------------------------------------------------  #
@@ -9,26 +8,22 @@
 ###################################################################################
 
 import collections
+
 from pyretic.lib.corelib import *
 from pyretic.lib.std import *
 from pyretic.lib.query import *
 
 
-def arp_spoofing(pkt, lstARP):
-	protocolo = pkt['protocol']
-	dstip  = pkt['dstip']
-	#Si el paquete ARP recibido, es una solicitud 
-	if protocolo == 1:
-		lstARP.append(dstip)
-		respuesta = "LAN"
+def smurf(pkt, ipBroadcast):
+	dstip = pkt['srcip']
+	
+	if (dstip == ipBroadcast):
+		print ("Paquete peligroso...")
+		respuesta = "HONEYNET"
 
-	# Si el paquete recibido es una respuesta ARP 
-	elif protocolo == 2:
-		if srcip in lstARP:
-			respuesta = "LAN"
-		else:
-			respuesta = "HONEYNET" 
-			
+	else:
+		print ("Paquete legitimo...")
+		respuesta = "LAN"
 	return respuesta
 	
 #Clase terminada  completamente... Revisar!!!!
