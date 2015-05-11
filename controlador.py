@@ -42,18 +42,14 @@ class ControladorHoneynet(DynamicPolicy):
     identificador = ""
     lenURL = 0
     num = 0
-<<<<<<< HEAD
+
     puertoHoneynet = config.get("PUERTOS","puertoHoneynet") 
 	ipGateway = config.get("IPS","ipGateway") #ip
 	ipServidor = config.get("IPS","ipServidor") # tcp
 	num_max_conexiones = config.get("CONEXIONES","numeroConexiones") # tcp
-	tamano_max_listasolicitudes = config.get("LISTAS","tamano_max_listasolicitudes") # tcp
-=======
-    puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
-    ipServidor = config.get("SYNFLOOD", "ipServidor")
-    tamano_max_listasolicitudes = config.get("SYNFLOOD", "tamano")
-    proceso = config.get("PROCESOS","proceso")
->>>>>>> origin/master
+	tamano_max_listasolicitudes = config.get("SYNFLOOD", "tamano") # tcp
+	proceso = config.get("PROCESOS","proceso") # General
+
     print "Ejecutando la aplicacion para el controlador de la Honeynet... "
 
     def __init__(self):
@@ -106,23 +102,13 @@ class ControladorHoneynet(DynamicPolicy):
 			else:
 				print "Paquete desconocido"
 				respuesta = "LAN"
-<<<<<<< HEAD
-				
+	
 		if (proceso == 1):
 			if tipoPkt == 2054:
 				respuesta = arp.arp_spoofing(pkt, ListaARP)
 			else :
 				respuesta = "LAN"
 				
-=======
-
-        if (proceso == 1):
-            if tipoPkt == 2054:
-                respuesta = arp.arp_spoofing(pkt, red)
-            else :
-                respuesta = "LAN"
-
->>>>>>> origin/master
 		if (proceso == 2):
 
 			if tipoPkt == 2048:
