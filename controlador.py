@@ -7,12 +7,13 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 #Nuevo comentario
-import syn_flood
-import protocolo_ip
+import arp
+import ip
+import tcp
+import udp
+import icmp
+import https
 import enviar
-import protocolo_arp
-import thc_ssl_dos
-import dns_spoofing
 from pyretic.lib.corelib import *
 from pyretic.lib.query import *
 from ConfigParser import ConfigParser
@@ -42,6 +43,9 @@ class ControladorHoneynet(DynamicPolicy):
     lenURL = 0
     num = 0
     puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
+    ipServidor = config.get("SYNFLOOD", "ipServidor")
+    tamano_max_listasolicitudes = config.get("SYNFLOOD", "tamano")
+    proceso = config.get("PROCESOS","proceso")
     print "Ejecutando la aplicacion para el controlador de la Honeynet... "
 
     def __init__(self):
@@ -61,18 +65,17 @@ class ControladorHoneynet(DynamicPolicy):
 
     def paquete(self,pkt):
 
-		try:
+        try:
 			tipoPkt = pkt['ethtype']
 			red = self.network
 			dstip = pkt['dstip']
 			protocolo = pkt['protocol']
 			dstport = pkt['dstport']
 			srcport = pkt['srcport']
-
-		except:
+        except:
 			print "%%%%%%%%%%%%%%%%%%%%"
 			
-		if (proceso == 0):		
+        if proceso == 0:
 
 			if tipoPkt == 2054:
 				respuesta = arp.arp_spoofing(pkt, red)				
@@ -95,14 +98,15 @@ class ControladorHoneynet(DynamicPolicy):
 			else:
 				print "Paquete desconocido"
 				respuesta = "LAN"
-				
-		if (proceso == 1):
-			if tipoPkt == 2054:
-				respuesta = arp.arp_spoofing(pkt, red)
-			else :
-				respuesta = "LAN"
-				
+
+        if (proceso == 1):
+            if tipoPkt == 2054:
+                respuesta = arp.arp_spoofing(pkt, red)
+            else :
+                respuesta = "LAN"
+
 		if (proceso == 2):
+
 			if tipoPkt == 2048:
 				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)				
 			else:
@@ -126,17 +130,17 @@ class ControladorHoneynet(DynamicPolicy):
 			else:
 				respuesta = "LAN"
 				
-		if (proceso == 6):
-			if tipoPkt == 2048 and dstport == 443 or srcport == 443:
-					respuesta = https.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
-			else:
-					respuesta = "LAN"
-				
-		if respuesta == LAN
-			enviar.enviar_paquete(pkt)
-			
-		else respuesta == HONEYNET
-			enviar.enviar_Honeynet(pkt)
+        if (proceso == 6):
+            if tipoPkt == 2048 and dstport == 443 or srcport == 443:
+                respuesta = https.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
+            else:
+                respuesta = "LAN"
+
+        if respuesta == "LAN":
+            enviar.enviar_paquete(pkt)
+        else respuesta == "HONEYNET":
+            enviar.enviar_Honeynet(pkt)
+
 					
 				
 				
