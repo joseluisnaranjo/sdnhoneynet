@@ -22,26 +22,30 @@ class ControladorHoneynet(DynamicPolicy):
     config = ConfigParser()
     config.read("honeynet.cfg")
     IpPuerto = {}
-    IpMac = {}
-    Paquete = Packet()
-    lstSrcMac = []
-    lstMacAtacante = []
-    ListaSolicitudes = []
-    ListaAtacantes = []
-    ListaClientes = []
+    IpMac = {} #ip
+    Paquete = Packet() #ip
+    lstSrcMac = [] #ip
+    lstMacAtacante = [] #ip
+    ListaSolicitudes = [] # tcp
+    ListaAtacantes = [] # tcp
+    ListaClientes = [] # tcp
     ListaSolicitudesT = []
     ListaAtacantesT = []
     ListaClientesT = []
-    ListaRARP = []
+    ListaARP = [] # arp
     ListaDNS = []
-    IpNumS = {}
-    IpNumC = {}
+    IpNumSOLT = {}
+    IpNumCLIT = {}
     IpNum = {}
     paqueteARP = Packet()
     identificador = ""
     lenURL = 0
     num = 0
-    puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
+    puertoHoneynet = config.get("PUERTOS","puertoHoneynet") 
+	ipGateway = config.get("IPS","ipGateway") #ip
+	ipServidor = config.get("IPS","ipServidor") # tcp
+	num_max_conexiones = config.get("CONEXIONES","numeroConexiones") # tcp
+	tamano_max_listasolicitudes = config.get("LISTAS","tamano_max_listasolicitudes") # tcp
     print "Ejecutando la aplicacion para el controlador de la Honeynet... "
 
     def __init__(self):
@@ -75,13 +79,13 @@ class ControladorHoneynet(DynamicPolicy):
 		if (proceso == 0):		
 
 			if tipoPkt == 2054:
-				respuesta = arp.arp_spoofing(pkt, red)				
+				respuesta = arp.arp_spoofing(pkt, ListaARP)				
 
 			elif tipoPkt == 2048:				
-				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)
+				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante, self.ipGateway)
 				if respuesta == "LAN":
 					if protocolo == 6:
-						respuesta = tcp.tcp_syn_flood(pkt, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes, self.IpNum )
+						respuesta = tcp.tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumSOLT, IpNumCLIT, ipServidor, num_max_conexiones, tamano_max_listasolicitudes)
 						if respuesta == "LAN":							
 							if dstport == 443 or srcport == 443:
 								respuesta = https.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
@@ -98,19 +102,19 @@ class ControladorHoneynet(DynamicPolicy):
 				
 		if (proceso == 1):
 			if tipoPkt == 2054:
-				respuesta = arp.arp_spoofing(pkt, red)
+				respuesta = arp.arp_spoofing(pkt, ListaARP)
 			else :
 				respuesta = "LAN"
 				
 		if (proceso == 2):
 			if tipoPkt == 2048:
-				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante)				
+				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante, self.ipGateway)
 			else:
 				respuesta = "LAN"
 				
 		if (proceso == 3):
 			if tipoPkt == 2048 and protocolo == 6:
-				respuesta = tcp.tcp_syn_flood()
+				respuesta = tcp.tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumSOLT, IpNumCLIT, ipServidor, num_max_conexiones, tamano_max_listasolicitudes)
 			else:
 				respuesta = "LAN"
 		

@@ -9,7 +9,7 @@
 
 from ConfigParser import ConfigParser
 
-def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNum, ipServidor, num_max_conexiones, tamano_max_listasolicitudes):
+def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumSOLT, IpNumCLIT, ipServidor, num_max_conexiones, tamano_max_listasolicitudes):
 
     srcip  = pkt['srcip']
     tcp_flags = payload(pkt, 94, 96)

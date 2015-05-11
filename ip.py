@@ -45,7 +45,7 @@ def ip_spoofing(pkt, IpMac, paquete, lstSrcMac, lstMacAtacante, ipGateway):
 				IpMac[srcip] = srcmac
 				lstSrcMac.clear()
 				paquete = Packet()
-				print ("Pkt legitimo")
+				print ("Paquete legitimo")
 				respuesta = "LAN"
 
 		else:
@@ -63,7 +63,7 @@ def verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante):
     srcip = pkt['srcip']
 
     if (srcmac in lstMacAtacante):
-        print ("paquete peligroso")
+        print ("Paquete peligroso")
         respuesta = "HONEYNET"
 
     else:
