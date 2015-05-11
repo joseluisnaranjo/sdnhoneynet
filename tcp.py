@@ -69,7 +69,7 @@ def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumSOL
                 if srcip in ListaSolicitudes:
                     ListaSolicitudes.remove(srcip)
                     ListaClientes.append(srcip)
-					IpNumSOLT[srcip] = IpNumSOLT[srcip] - 1
+                    IpNumSOLT[srcip] = IpNumSOLT[srcip] - 1
                     print "Paquete legitimo......"
                     respuesta  = "LAN"
                 else:
