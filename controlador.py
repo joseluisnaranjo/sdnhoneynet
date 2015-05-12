@@ -33,11 +33,11 @@ class ControladorHoneynet(DynamicPolicy):
     ListaSolicitudesT = []
     ListaAtacantesT = []
     ListaClientesT = []
-	ListaAtacanteDNS = []
+	ListaAtacanteDNS = [] # udp
     ListaARP = [] # arp
     ListaDNS = []
-    IpNumSOLT = {}
-    IpNumCLIT = {}
+    IpNumSOLT = {} #tcp
+    IpNumCLIT = {} #tcp
     IpNum = {}
     paqueteARP = Packet()
     identificador = ""
@@ -47,6 +47,7 @@ class ControladorHoneynet(DynamicPolicy):
     puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
     ipGateway = config.get("IPS","ipGateway") #ip
     ipServidor = config.get("IPS","ipServidor") # tcp
+	macGateway = config.get("DNS_Spoofing","macGateway") #udp
     num_max_conexiones = config.get("CONEXIONES","numeroConexiones") # tcp
     tamano_max_listasolicitudes = config.get("SYNFLOOD", "tamano") # tcp
     proceso = config.getint("PROCESOS","proceso") # General
@@ -99,7 +100,7 @@ class ControladorHoneynet(DynamicPolicy):
 							else:
 								respuesta = "LAN"
 					elif protocolo == 17:
-						respuesta = udp.dns_spoofing(pkt, red,ListaAtacanteDNS)
+						respuesta = udp.dns_spoofing(pkt, red, ListaAtacanteDNS, macGateway)
 						
 					elif protocolo == 1:
 						respuesta = icmp.smurf(pkt)				
@@ -128,7 +129,7 @@ class ControladorHoneynet(DynamicPolicy):
 		
 		if self.proceso == 4:
 			if tipoPkt == 2048 and protocolo == 17:
-				respuesta = udp.dns_spoofing(pkt, red)
+				respuesta = udp.dns_spoofing(pkt, red, ListaAtacanteDNS, macGateway)
 			else:
 				respuesta = "LAN"
 				

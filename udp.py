@@ -7,16 +7,9 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
-import enviar
-from ConfigParser import ConfigParser
 
-config = ConfigParser()
-config.read("honeynet.cfg") #Se ha creado una instancia de la clase ConfigParser que nos permite  leer un archivo de configuracion
-
-def dns_spoofing(pkt,red,ListaAtacanteDNS):
-	srcmac = pkt['srcmac']
-    macGateway = config.get("DNS_Spoofing","macGateway")
-	
+def dns_spoofing(pkt,red,ListaAtacanteDNS, macGateway):
+	srcmac = pkt['srcmac']	
 	of_payload_code = pkt['raw']
 	#A continucaion se codifica en hexadecimal dicho payload
 	of_payload = of_payload_code.encode("hex")
@@ -28,9 +21,10 @@ def dns_spoofing(pkt,red,ListaAtacanteDNS):
 	else:
 		if (dns_flags == 8180):
 			if srcmac ==  macGateway:
-				enviar.enviar_paquete(pkt, red)
+				respuesta = "LAN"
 			else:
 				ListaAtacantes.append(srcmac)
-				enviar.enviar_Honeynet(pkt, red)
+				respuesta = "HONEYNET"
 		else:
-			enviar.enviar_paquete(pkt, red)
+			respuesta = "LAN"
+	return respuesta
