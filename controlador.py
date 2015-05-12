@@ -33,6 +33,7 @@ class ControladorHoneynet(DynamicPolicy):
     ListaSolicitudesT = []
     ListaAtacantesT = []
     ListaClientesT = []
+	ListaAtacanteDNS = []
     ListaARP = [] # arp
     ListaDNS = []
     IpNumSOLT = {}
@@ -98,7 +99,7 @@ class ControladorHoneynet(DynamicPolicy):
 							else:
 								respuesta = "LAN"
 					elif protocolo == 17:
-						respuesta = udp.dns_spoofing(pkt, red)
+						respuesta = udp.dns_spoofing(pkt, red,ListaAtacanteDNS)
 						
 					elif protocolo == 1:
 						respuesta = icmp.smurf(pkt)				
