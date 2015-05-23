@@ -10,10 +10,8 @@
 from pyretic.lib.corelib import *
 from ConfigParser import ConfigParser
 
-def enviar_paquete(paquete, network):
-    config = ConfigParser()
-    config.read("honeynet.cfg")
-    puertoHoneynet = config.getint("PUERTOS", "puertoHoneynet")
+def enviar_paquete(paquete, network, puertoHoneynet):
+
     switch = paquete['switch']
     inport = paquete['inport']
 
@@ -22,10 +20,8 @@ def enviar_paquete(paquete, network):
         paquete = paquete.modify(outport=puerto)
         network.inject_packet(paquete)
 
-def enviar_Honeynet(paquete, network):
-    config = ConfigParser()
-    config.read("honeynet.cfg")
-    puertoHoneynet = config.getint("PUERTOS", "puertoHoneynet")
+def enviar_Honeynet(paquete, network, puertoHoneynet):
+
     switch = paquete['switch']
     paquete = paquete.modify(outport=puertoHoneynet)
     network.inject_packet(paquete)

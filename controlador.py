@@ -33,7 +33,7 @@ class ControladorHoneynet(DynamicPolicy):
     ListaSolicitudesT = []
     ListaAtacantesT = []
     ListaClientesT = []
-	ListaAtacanteDNS = [] # udp
+    ListaAtacantesDNS = [] # udp
     ListaARP = [] # arp
     ListaDNS = []
     IpNumSOLT = {} #tcp
@@ -44,10 +44,10 @@ class ControladorHoneynet(DynamicPolicy):
     lenURL = 0
     num = 0
 
-    puertoHoneynet = config.get("PUERTOS","puertoHoneynet")
+    puertoHoneynet = config.getint("PUERTOS", "puertoHoneynet")
     ipGateway = config.get("IPS","ipGateway") #ip
     ipServidor = config.get("IPS","ipServidor") # tcp
-	macGateway = config.get("DNS_Spoofing","macGateway") #udp
+    macGateway = config.get("MACS","macGateway") #udp
     num_max_conexiones = config.get("CONEXIONES","numeroConexiones") # tcp
     tamano_max_listasolicitudes = config.get("SYNFLOOD", "tamano") # tcp
     proceso = config.getint("PROCESOS","proceso") # General
@@ -69,7 +69,7 @@ class ControladorHoneynet(DynamicPolicy):
     def set_network(self, network):
 		self.network = network
 
-    def paquete(self,pkt, ):
+    def paquete(self,pkt ):
 
         try:
 			tipoPkt = pkt['ethtype']
@@ -100,7 +100,7 @@ class ControladorHoneynet(DynamicPolicy):
 							else:
 								respuesta = "LAN"
 					elif protocolo == 17:
-						respuesta = udp.dns_spoofing(pkt, red, ListaAtacanteDNS, macGateway)
+						respuesta = udp.dns_spoofing(pkt, red, self.ListaAtacantesDNS, self.macGateway)
 						
 					elif protocolo == 1:
 						respuesta = icmp.smurf(pkt)				
@@ -108,32 +108,29 @@ class ControladorHoneynet(DynamicPolicy):
 				print "Paquete desconocido"
 				respuesta = "LAN"
 
-        if self.proceso == 1:
+        elif self.proceso == 1:
             if tipoPkt == 2054:
 				respuesta = arp.arp_spoofing(pkt, self.ListaARP)
             else :
                 respuesta = "LAN"
-				
-		if self.proceso == 2:
+
+        elif self.proceso == 2:
 
 			if tipoPkt == 2048:
 				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante, self.ipGateway)
 			else:
 				respuesta = "LAN"
-				
-		if self.proceso == 3:
+        elif self.proceso == 3:
 			if tipoPkt == 2048 and protocolo == 6:
 				respuesta = tcp.tcp_syn_flood(pkt, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes, self.IpNumSOLT, self.IpNumCLIT, self.ipServidor, self.num_max_conexiones, self.tamano_max_listasolicitudes)
 			else:
 				respuesta = "LAN"
-		
-		if self.proceso == 4:
+        elif self.proceso == 4:
 			if tipoPkt == 2048 and protocolo == 17:
-				respuesta = udp.dns_spoofing(pkt, red, ListaAtacanteDNS, macGateway)
+				respuesta = udp.dns_spoofing(pkt, red, self.ListaAtacantesDNS, self.macGateway)
 			else:
 				respuesta = "LAN"
-				
-		if self.proceso == 5:
+        elif self.proceso == 5:
 			if tipoPkt == 2048 and protocolo == 1:
 				respuesta = icmp.smurf(pkt)
 			else:
@@ -146,15 +143,9 @@ class ControladorHoneynet(DynamicPolicy):
                 respuesta = "LAN"
 
         if respuesta == "LAN":
-            enviar.enviar_paquete(pkt,red)
+            enviar.enviar_paquete(pkt, red, self.puertoHoneynet)
         elif respuesta == "HONEYNET":
-            enviar.enviar_Honeynet(pkt,red)
-
-					
-				
-				
-				
-				
+            enviar.enviar_Honeynet(pkt, red, self.puertoHoneynet)
 				
 def main():
 	return ControladorHoneynet()

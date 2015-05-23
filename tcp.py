@@ -95,9 +95,10 @@ def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumSOL
 	return respuesta
 
 def payload(pkt,num1,num2):
-	of_payload_code = pkt['raw']
-	of_payload = of_payload_code.encode("hex")
-	respuesta  = of_payload[num1:num2]
+    of_payload_code = pkt['raw']
+    of_payload = of_payload_code.encode("hex")
+    bandera = of_payload[num1:num2]
+    return bandera
 
 	
 #Clase terminada  completamente... Revisar!!!!
