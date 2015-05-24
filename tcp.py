@@ -7,90 +7,78 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
+import collections
 from ConfigParser import ConfigParser
 
-def tcp_syn_flood(pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumSOLT, IpNumCLIT, ipServidor, num_max_conexiones, tamano_max_listasolicitudes):
 
-    srcip  = pkt['srcip']
+def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, num_max_conexiones):
+
+    srcip = pkt['srcip']
     tcp_flags = payload(pkt, 94, 96)
+    respuesta = ""
 
     if ipServidor == srcip:
         print "Paquete legitimo"
-        respuesta  = "LAN"
+        respuesta = "LAN"
     else:
         if str(tcp_flags) == "02":
-            if srcip in ListaAtacantes:
+            if srcip in lstAtacantes:
                 print "Paquete peligroso..."
-                respuesta  = "HONEYNEY"
+                respuesta  = "HONEYNET"
 
             else:
-                if srcip in ListaSolicitudes:
-                    if IpNumSOLT.has_key(srcip):
-						if IpNumSOLT[srcip] < num_max_conexiones:
-							IpNumSOLT[srcip] = IpNumSOLT[srcip] + 1
-							respuesta  = "LAN"
-						else:
-							ListaSolicitudes.remove(srcip)
-							ListaAtacantes.append(srcip)
-							del IpNumSOLT[srcip]
-							respuesta  = "HONEYNET"
+                if dicSolicitudes.has_key(srcip):
+                    if dicSolicitudes[srcip] < num_max_conexiones:
+                        dicSolicitudes[srcip] = dicSolicitudes[srcip] + 1
+                        respuesta  = "LAN"
                     else:
-						IpNumSOLT[srcip] = 1
-						respuesta  = "LAN"					
+                        del dicSolicitudes[srcip]
+                        lstAtacantes.append(srcip)
+                        respuesta  = "HONEYNET"
+
 					
                 else:
-                    if srcip in ListaClientes:
-                        if IpNumCLIT.has_key(srcip):
-                            if IpNumCLIT[srcip] < num_max_conexiones:
-                                IpNumCLIT[srcip] = IpNumCLIT[srcip] + 1
-                                respuesta  = "LAN"
-                            else:
-                                ListaClientes.remove(srcip)
-                                ListaAtacantes.append(srcip)
-                                del IpNumCLIT[srcip]
-                                respuesta  = "HONEYNET"
-                        else:
-                            IpNumCLIT[srcip] = 1
+                    if dicClientes.has_key(srcip):
+                        if dicClientes[srcip] < num_max_conexiones:
+                            dicClientes[srcip] = dicClientes[srcip] + 1
                             respuesta  = "LAN"
+                        else:
+                            del dicClientes[srcip]
+                            lstAtacantes.append(srcip)
+                            respuesta  = "HONEYNET"
+
                     else:
-                        if len(ListaSolicitudes) < tamano_max_listasolicitudes:
-                            ListaSolicitudes.append(srcip)
-                            print "Paquete legitimo......"
-                            respuesta  = "LAN"
-                        else:
-                            ListaAtacantes.append(ListaSolicitudes[0])
-                            del ListaSolicitudes[0]
-                            ListaSolicitudes.append(srcip)
-                            print "Paquete legitimo... ..."
-                            respuesta  = "LAN"
+                        dicSolicitudes[srcip] = 1
+                        print "Paquete legitimo......"
+                        respuesta  = "LAN"
+
         else:
             print str(tcp_flags)
             if str(tcp_flags) == "10":
-                if srcip in ListaSolicitudes:
-                    ListaSolicitudes.remove(srcip)
-                    ListaClientes.append(srcip)
-                    IpNumSOLT[srcip] = IpNumSOLT[srcip] - 1
+                if dicSolicitudes.has_key(srcip):
+                    del dicSolicitudes[srcip]
+                    dicClientes[srcip] = 1
                     print "Paquete legitimo......"
                     respuesta  = "LAN"
                 else:
-                    if srcip in ListaAtacantes:
-                         ListaAtacantes.remove(srcip)
-                         ListaClientes.append(srcip)
+                    if srcip in lstAtacantes:
+                         lstAtacantes.remove(srcip)
+                         dicClientes[srcip] = 1
                          print "Paquete legitimo......"
                          respuesta  = "LAN"
                     else:
-						if srcip in ListaClientes:
-							print "Paquete legitimo......"
-							respuesta  = "LAN"
+                        if dicClientes.has_key(srcip):
+                            try:
+                                dicClientes[srcip] = dicClientes[srcip] - 1
+                                print "Paquete legitimo......"
+                                respuesta  = "LAN"
+
+                            except:
+                                print "El diccionario de clientes esta en 0"
+                                respuesta ="LAN"
             else:
-                if str(tcp_flags) == "11":
-                    if srcip in ListaClientes:
-                        if IpNumCLIT.has_key(srcip):
-                            IpNumCLIT[srcip] = IpNumCLIT[srcip] - 1
-                    respuesta  = "LAN"
-                else:
-                    print "Paquete legitimo......"
-                    respuesta  = "LAN"
+                print "Paquete desconocido......"
+                respuesta  = "LAN"
 					
 	return respuesta
 
