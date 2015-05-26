@@ -27,26 +27,34 @@ class ControladorHoneynet(DynamicPolicy):
     Paquete = Packet() #ip
     lstSrcMac = [] #ip
     lstMacAtacante = [] #ip
+
     dicSolicitudesT = {}  # tcp
     lstAtacantesT = []  # tcp
     dicClientesT = {}  # tcp
+
+    dicSolicitudesS = {}  # ssl
+    lstAtacantesS = []  # ssl
+    dicClientesS = {}  # ssl
+
+
     ListaSolicitudesS = []
     ListaAtacantesS = []
     ListaClientesS = []
     ListaAtacantesDNS = [] # udp
     ListaARP = [] # arp
     ListaDNS = []
-    IpNumSOLT = {} #tcp
-    IpNumCLIT = {} #tcp
-    IpNum = {}
+
+
     paqueteARP = Packet()
     identificador = ""
     lenURL = 0
     num = 0
 
+
     puertoHoneynet = config.getint("PUERTOS", "puertoHoneynet")
     ipGateway = config.get("IPS","ipGateway") #ip
     ipServidor = config.get("IPS","ipServidor") # tcp
+    ipBroadcast = config.get("IPS","ipBroadcast") # tcp
     macGateway = config.get("MACS","macGateway") #udp
     num_max_conexiones = config.getint("CONEXIONES","numeroConexiones") # tcp
 
@@ -72,20 +80,18 @@ class ControladorHoneynet(DynamicPolicy):
     def paquete(self,pkt ):
 
         try:
-            inport = pkt['inport']
+
             tipoPkt = pkt['ethtype']
             red = self.network
-            dstip = pkt['dstip']
+            srcip = pkt['srcip']
             protocolo = pkt['protocol']
             dstport = pkt['dstport']
             srcport = pkt['srcport']
 
+
         except:
-            print "%%%%%%%%%%%%%%%%%%%%"
-            if inport == self.puertoHoneynet:
-                print("Viene de HONEYNET")
-            else:
-                print("Viene de LAN")
+            print "EQQQQ"
+
 
 
         respuesta = ""
@@ -127,26 +133,38 @@ class ControladorHoneynet(DynamicPolicy):
 			else:
 				respuesta = "LAN"
         elif self.proceso == 3:
-			if tipoPkt == 2048 and protocolo == 6:
-				respuesta = tcp.tcp_syn_flood(pkt, self.lstAtacantesT, self.dicSolicitudesT, self.dicClientesT, self.ipServidor, self.num_max_conexiones)
-			else:
-				respuesta = "LAN"
+            try:
+                if tipoPkt == 2048 and protocolo == 6:
+                    respuesta = tcp.tcp_syn_flood(pkt, self.lstAtacantesT, self.dicSolicitudesT, self.dicClientesT, self.ipServidor, self.num_max_conexiones)
+                else:
+                    if (srcip in self.lstAtacantesT):
+                        respuesta  = "HONEYNET"
+                    else:
+                        respuesta = "LAN"
+            except:
+                print("ERROR TCP")
         elif self.proceso == 4:
-			if tipoPkt == 2048 and protocolo == 17:
-				respuesta = udp.dns_spoofing(pkt, red, self.ListaAtacantesDNS, self.macGateway)
-			else:
+            if tipoPkt == 2048 and protocolo == 17:
+                respuesta = udp.dns_spoofing(pkt, red, self.ListaAtacantesDNS, self.macGateway)
+            else:
 				respuesta = "LAN"
         elif self.proceso == 5:
 			if tipoPkt == 2048 and protocolo == 1:
-				respuesta = icmp.smurf(pkt)
+				respuesta = icmp.smurf(pkt, IP(self.ipBroadcast))
 			else:
 				respuesta = "LAN"
 				
         if self.proceso == 6:
-            if tipoPkt == 2048 and dstport == 443 or srcport == 443:
-                respuesta = https.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
-            else:
-                respuesta = "LAN"
+            try:
+                if tipoPkt == 2048 and (dstport == 443 or srcport == 443):
+                    respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, self.ipServidor, self.num_max_conexiones)
+                else:
+                    if (srcip in self.lstAtacantesS):
+                            respuesta  = "HONEYNET"
+                    else:
+                            respuesta = "LAN"
+            except:
+                print "ERROR HTTPS"
         if respuesta == "LAN":
             enviar.enviar_paquete(pkt, red, self.puertoHoneynet)
         elif respuesta == "HONEYNET":

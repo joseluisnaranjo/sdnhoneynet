@@ -11,107 +11,81 @@ from pyretic.lib.corelib import *
 from ConfigParser import ConfigParser
 import enviar
 
-def thc_ssl_dos(red, pkt, ListaAtacantes, ListaClientes, ListaSolicitudes, IpNumC, IpNumS):
+def thc_ssl_dos( pkt, lstAtacantes, dicSolicitudes, dicClientes ,ipServidor, num_max_conexiones):
 
-    config = ConfigParser()
-    config.read("honeynet.cfg")
-    ipServidor = config.get("SYNFLOOD", "ipServidor")
-    num_max_conexiones = config.getint("SYNFLOOD", "num")
-    tamano_max_listasolicitudes = config.getint("SYNFLOOD", "tamano")
     srcip  = pkt['srcip']
-    dstip  = pkt['dstip']
-
     ssl_flags1= payload(pkt, 118, 120)
     ssl_flags2 = payload(pkt, 142, 144)
     ssl_dato1 = payload(pkt, 108, 110)
     ssl_dato2 = payload(pkt, 132, 134)
 
-    if (str(ssl_flags1) == "01") or (str(ssl_flags2) == "01"):
-        if srcip == IPAddr(ipServidor):
-            enviar.enviar_paquete(pkt, red)
-        else:
-                if srcip in ListaAtacantes:
-                    print "Enviar ala Honeynet..."
-                    enviar.enviar_Honeynet(pkt, red)
 
-                else:
-                    if srcip in ListaSolicitudes:
-                        if IpNumS.has_key(srcip):
-                                if IpNumS[srcip] < num_max_conexiones:
-                                    IpNumS[srcip] = IpNumS[srcip] + 1
-                                    print "Enviar a la LAN..."
-                                    enviar.enviar_paquete(pkt, red)
-                                else:
-                                    ListaSolicitudes.remove(srcip)
-                                    ListaAtacantes.append(srcip)
-                                    del IpNumS[srcip]
-                                    print "Enviar ala Honeynet..."
-                                    enviar.enviar_Honeynet(pkt, red)
-                        else:
-                            IpNumS[srcip] = 1
-                            print "Enviar a la LAN..."
-                            enviar.enviar_paquete(pkt, red)
 
-                    else:
-                        if srcip in ListaClientes:
-                            if IpNumC.has_key(srcip):
-                                if IpNumC[srcip] < num_max_conexiones:
-                                    IpNumC[srcip] = IpNumC[srcip] + 1
-                                    print "Enviar a la LAN..."
-                                    enviar.enviar_paquete(pkt, red)
-                                else:
-                                    ListaClientes.remove(srcip)
-                                    ListaAtacantes.append(srcip)
-                                    del IpNumC[srcip]
-                                    print "Enviar ala Honeynet..."
-                                    enviar.enviar_Honeynet(pkt, red)
-                            else:
-                                IpNumC[srcip] = 1
-                                print "Enviar a la LAN..."
-                                enviar.enviar_paquete(pkt, red)
-                        else:
-                            if len(ListaSolicitudes) < tamano_max_listasolicitudes:
-                                ListaSolicitudes.append(srcip)
-                                print "Enviar a la LAN..."
-                                enviar.enviar_paquete(pkt, red)
-                            else:
-                                ListaAtacantes.append(ListaSolicitudes[0])
-                                del ListaSolicitudes[0]
-                                ListaSolicitudes.append(srcip)
-                                print "Enviar a la LAN..."
-                                enviar.enviar_paquete(pkt, red)
+    if ipServidor == srcip:
+        print "Paquete legitimo"
+        respuesta = "LAN"
     else:
-                if (str(ssl_dato1) == "17") or (str(ssl_dato2) == "17"):
-                    if dstip in ListaSolicitudes:
-                        ListaSolicitudes.remove(dstip)
-                        ListaClientes.append(dstip)
-                        IpNumS[dstip] = IpNumS[dstip] - 1
-                        print "Enviar a la LAN..."
-                        enviar.enviar_paquete(pkt, red)
+        if (str(ssl_flags1) == "01") or (str(ssl_flags2) == "01"):
+            if srcip in lstAtacantes:
+                print "Paquete peligroso..."
+                respuesta  = "HONEYNET"
 
+            else:
+                if dicSolicitudes.has_key(srcip):
+                    if dicSolicitudes[srcip] < num_max_conexiones:
+                        dicSolicitudes[srcip] = dicSolicitudes[srcip] + 1
+                        respuesta  = "LAN"
                     else:
-                        if dstip in ListaAtacantes:
-                             ListaAtacantes.remove(dstip)
-                             ListaClientes.append(dstip)
-                             print "Enviar a la LAN..."
-                             enviar.enviar_paquete(pkt, red)
+                        del dicSolicitudes[srcip]
+                        lstAtacantes.append(srcip)
+                        respuesta  = "HONEYNET"
 
-                        else:
-                            if dstip in ListaClientes:
-                                print "Enviar a la LAN..."
-                                enviar.enviar_paquete(pkt, red)
-                            else:
-                                if srcip in ListaAtacantes:
-                                    enviar.enviar_Honeynet(pkt, red)
-                                else:
-                                    enviar.enviar_paquete(pkt, red)
 
                 else:
-                    if srcip in ListaAtacantes:
-                        enviar.enviar_Honeynet(pkt,red)
+                    if dicClientes.has_key(srcip):
+                        if dicClientes[srcip] < num_max_conexiones:
+                            dicClientes[srcip] = dicClientes[srcip] + 1
+                            respuesta  = "LAN"
+                        else:
+                            del dicClientes[srcip]
+                            lstAtacantes.append(srcip)
+                            respuesta  = "HONEYNET"
+
                     else:
-                        print "Enviar a la LAN..."
-                        enviar.enviar_paquete(pkt, red)
+                        dicSolicitudes[srcip] = 1
+                        print "Paquete legitimo......"
+                        respuesta  = "LAN"
+
+        else:
+
+            if (str(ssl_dato1) == "17") or (str(ssl_dato2) == "17"):
+                if dicSolicitudes.has_key(srcip):
+                    del dicSolicitudes[srcip]
+                    dicClientes[srcip] = 1
+                    print "Paquete legitimo......"
+                    respuesta  = "LAN"
+                else:
+                    if srcip in lstAtacantes:
+                         lstAtacantes.remove(srcip)
+                         dicClientes[srcip] = 1
+                         print "Paquete legitimo......"
+                         respuesta  = "LAN"
+                    else:
+                        if dicClientes.has_key(srcip):
+                            try:
+                                dicClientes[srcip] = dicClientes[srcip] - 1
+                                print "Paquete legitimo......"
+                                respuesta  = "LAN"
+
+                            except:
+                                print "El diccionario de clientes esta en 0"
+                                respuesta ="LAN"
+            else:
+                print "Paquete desconocido......"
+                respuesta  = "LAN"
+
+	return respuesta
+
 
 
 def payload(pkt,num1,num2):
