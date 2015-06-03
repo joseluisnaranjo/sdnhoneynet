@@ -19,32 +19,15 @@ def enviar_paquete(paquete, network, puertoHoneynet):
         puerto = port.port_no
         paquete = paquete.modify(outport=puerto)
         network.inject_packet(paquete)
+        print "Paquete enviado a la LAN!!..."
 
 def enviar_Honeynet(paquete, network, puertoHoneynet):
-
-    switch = paquete['switch']
     paquete = paquete.modify(outport=puertoHoneynet)
     network.inject_packet(paquete)
-    print "Paquete enviado a al HONEYNET exitosamente!!..."
+    print "Paquete enviado a la HONEYNET !!..."
 
-#Prohibido Modificar
-def send(rp,network):
-    for port in network.topology.egress_locations():
-        puerto = port.port_no
-        rp = rp.modify(outport=puerto)
+
+def send(pkt,network, puerto):
+        rp = pkt.modify(outport=puerto)
         network.inject_packet(rp)
-        print "Paquete enviado exitosamente!!..."
-
-def enviar(paquete,network):
-    config = ConfigParser()
-    config.read("honeynet.cfg")
-    puertoHoneynet = config.getint("PUERTOS", "puertoHoneynet")
-    puertoLan = config.getint("PUERTOS", "puertoLan")
-    switch = paquete['switch']
-    inport = paquete['inport']
-    for port in network.topology.egress_locations() - {Location(switch, inport)}:
-        outport = port.port_no
-        if (((inport != puertoLan) or (outport != puertoHoneynet)) and ((inport != puertoHoneynet) or (outport != puertoLan))):
-            paquete = paquete.modify(outport=outport)
-            network.inject_packet(paquete)
-            print "Paquete enviado exitosamente!!..."
+        print "Paquete enviado a la LAN!!..."

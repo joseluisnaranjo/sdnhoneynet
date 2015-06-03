@@ -19,7 +19,7 @@ def thc_ssl_dos( pkt, lstAtacantes, dicSolicitudes, dicClientes ,ipServidor, num
     ssl_dato1 = payload(pkt, 108, 110)
     ssl_dato2 = payload(pkt, 132, 134)
 
-
+    respuesta = ""
 
     if ipServidor == srcip:
         print "Paquete legitimo"
@@ -81,10 +81,14 @@ def thc_ssl_dos( pkt, lstAtacantes, dicSolicitudes, dicClientes ,ipServidor, num
                                 print "El diccionario de clientes esta en 0"
                                 respuesta ="LAN"
             else:
-                print "Paquete desconocido......"
-                respuesta  = "LAN"
+                if srcip in lstAtacantes:
+                    print "Paquete peligroso..."
+                    respuesta  = "HONEYNET"
+                else:
+                    print "Paquete desconocido......"
+                    respuesta  = "LAN"
 
-	return respuesta
+    return respuesta
 
 
 

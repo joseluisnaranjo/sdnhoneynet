@@ -22,7 +22,7 @@ from ConfigParser import ConfigParser
 class ControladorHoneynet(DynamicPolicy):
     config = ConfigParser()
     config.read("honeynet.cfg")
-    IpPuerto = {}
+
     IpMac = {} #ip
     Paquete = Packet() #ip
     lstSrcMac = [] #ip
@@ -45,6 +45,7 @@ class ControladorHoneynet(DynamicPolicy):
     ListaDNS = []
 
 
+
     paqueteARP = Packet()
     identificador = ""
     lenURL = 0
@@ -57,7 +58,6 @@ class ControladorHoneynet(DynamicPolicy):
     ipBroadcast = config.get("IPS","ipBroadcast") # tcp
     macGateway = config.get("MACS","macGateway") #udp
     num_max_conexiones = config.getint("CONEXIONES","numeroConexiones") # tcp
-
     proceso = config.getint("PROCESOS","proceso") # General
 
     print "Ejecutando la aplicacion para el controlador de la Honeynet... "
@@ -83,14 +83,13 @@ class ControladorHoneynet(DynamicPolicy):
 
             tipoPkt = pkt['ethtype']
             red = self.network
-            srcip = pkt['srcip']
             protocolo = pkt['protocol']
-            dstport = pkt['dstport']
-            srcport = pkt['srcport']
-
+            srcip = pkt['srcip']
 
         except:
-            print "EQQQQ"
+            print pkt
+
+
 
 
 
@@ -120,18 +119,27 @@ class ControladorHoneynet(DynamicPolicy):
 				print "Paquete desconocido"
 				respuesta = "LAN"
 
+
+
+
         elif self.proceso == 1:
             if tipoPkt == 2054:
 				respuesta = arp.arp_spoofing(pkt, self.ListaARP)
             else :
                 respuesta = "LAN"
 
-        elif self.proceso == 2:
 
+
+
+        elif self.proceso == 2:
 			if tipoPkt == 2048:
 				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante, self.ipGateway)
 			else:
 				respuesta = "LAN"
+
+
+
+
         elif self.proceso == 3:
             try:
                 if tipoPkt == 2048 and protocolo == 6:
@@ -143,33 +151,44 @@ class ControladorHoneynet(DynamicPolicy):
                         respuesta = "LAN"
             except:
                 print("ERROR TCP")
+
+
+
         elif self.proceso == 4:
             if tipoPkt == 2048 and protocolo == 17:
-                respuesta = udp.dns_spoofing(pkt, red, self.ListaAtacantesDNS, self.macGateway)
+                respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesDNS, MAC(self.macGateway))
             else:
 				respuesta = "LAN"
+
+
+
+
         elif self.proceso == 5:
 			if tipoPkt == 2048 and protocolo == 1:
 				respuesta = icmp.smurf(pkt, IP(self.ipBroadcast))
 			else:
 				respuesta = "LAN"
+
+
+
 				
         if self.proceso == 6:
-            try:
-                if tipoPkt == 2048 and (dstport == 443 or srcport == 443):
-                    respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, self.ipServidor, self.num_max_conexiones)
+
+            if tipoPkt == 2048 and protocolo == 6:
+                respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_conexiones)
+            else:
+                if (srcip in self.lstAtacantesS):
+                        respuesta  = "HONEYNET"
                 else:
-                    if (srcip in self.lstAtacantesS):
-                            respuesta  = "HONEYNET"
-                    else:
-                            respuesta = "LAN"
-            except:
-                print "ERROR HTTPS"
+                        respuesta = "LAN"
+
+
         if respuesta == "LAN":
             enviar.enviar_paquete(pkt, red, self.puertoHoneynet)
         elif respuesta == "HONEYNET":
             enviar.enviar_Honeynet(pkt, red, self.puertoHoneynet)
-				
+
+
 def main():
 	return ControladorHoneynet()
 
