@@ -12,22 +12,28 @@ import enviar
 def dns_spoofing(pkt, ListaAtacantesDNS, macGateway):
     dstmac = pkt['dstmac']
     srcmac = pkt['srcmac']
+	respuesta = ""
 
-    of_payload_code = pkt['raw']
-    	#A continucaion se codifica en hexadecimal dicho payload
-    of_payload = of_payload_code.encode("hex")
-    	#A continuacion se  extrae alguas bandetas de TCP, aquellas que nos indican si es syn, syn-ack y ack
-    dns_flags = of_payload[54:100]
+    dns_flags = payload[96:100]
 
-    if srcmac in ListaAtacantesDNS:
-		respuesta = "HONEYNET"
-    else:
-		if (dns_flags == 0100):
-			if dstmac ==  macGateway:
-				respuesta = "LAN"
-			else:
-				ListaAtacantesDNS.append(dstmac)
-				respuesta = "HONEYNET"
-		else:
+	if (dns_flags != 0000):
+	#si es respuesta 
+		if srcmac ==  macGateway:
 			respuesta = "LAN"
+		else:
+			if srcmac in ListaAtacantesDNS:
+				respuesta = "HONEYNET"
+			else:
+				ListaAtacantesDNS.append(srcmac)
+				respuesta = "HONEYNET"
+	else:
+	#si es pregunta
+		respuesta = "LAN"
+			
     return respuesta
+
+	
+def payload(pkt,num1,num2):
+    of_payload_code = pkt['raw']
+    of_payload = of_payload_code.encode("hex")
+    return of_payload[num1:num2]

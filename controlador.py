@@ -89,10 +89,6 @@ class ControladorHoneynet(DynamicPolicy):
         except:
             print pkt
 
-
-
-
-
         respuesta = ""
 			
         if self.proceso == 0:
