@@ -22,6 +22,11 @@ from ConfigParser import ConfigParser
 class ControladorHoneynet(DynamicPolicy):
     config = ConfigParser()
     config.read("honeynet.cfg")
+	
+	dicSolicitudesARP = {} #arp
+	dicRespuestasARP = {} #arp
+	dicMacIp = {} #arp
+	ListaAtacantesARP = [] # arp
 
     IpMac = {} #ip
     Paquete = Packet() #ip
@@ -41,7 +46,7 @@ class ControladorHoneynet(DynamicPolicy):
     ListaAtacantesS = []
     ListaClientesS = []
     ListaAtacantesDNS = [] # udp
-    ListaARP = [] # arp
+    
     ListaDNS = []
 
 
@@ -58,6 +63,7 @@ class ControladorHoneynet(DynamicPolicy):
     ipBroadcast = config.get("IPS","ipBroadcast") # tcp
     macGateway = config.get("MACS","macGateway") #udp
     num_max_conexiones = config.getint("CONEXIONES","numeroConexiones") # tcp
+	num_max_solicitudes = confi.getint("SOLICITUDES", "numeroSolicitudes") #arp
     proceso = config.getint("PROCESOS","proceso") # General
 
     print "Ejecutando la aplicacion para el controlador de la Honeynet... "
@@ -120,7 +126,7 @@ class ControladorHoneynet(DynamicPolicy):
 
         elif self.proceso == 1:
             if tipoPkt == 2054:
-				respuesta = arp.arp_spoofing(pkt, self.ListaARP)
+				respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesARP, self.dicRespuestasARP, self.dicMacIp, self.ListaAtacantesARP, self.num_max_solicitudes)
             else :
                 respuesta = "LAN"
 

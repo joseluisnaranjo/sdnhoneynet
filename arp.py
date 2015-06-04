@@ -14,33 +14,59 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 
 
-def arp_spoofing(pkt, lstARP):
+def arp_spoofing(pkt,dicSolicitudesARP,dicRespuestasARP, dicMacIpSol, lstAtacantesARP, numerosolicitudes):
     protocolo = pkt['protocol']
     dstip  = pkt['dstip']
     srcip = pkt['srcip']
+	procesando = false
     respuesta = ""
 
 
     if protocolo == 1:
-        if dstip in lstARP:
-            respuesta = "FIN"
+		dicMacIpSol[srcmac]= srcip
+
+        if dicSolicitudesARP.has_key(dstip):
+			if dicSolicitudesARP[dstip] <= numerosolicitudes :
+				dicSolicitudesARP[dstip] = dicSolicitudesARP[dstip] + 1
+				respuesta = "LAN"
+			else:
+				respuesta = "FIN"
         else:
-            lstARP.append(dstip)
+            dicSolicitudesARP[dstip]= 1
             respuesta = "LAN"
-        return respuesta
+        
+    elif protocolo == 2:		
+		if srcmac in lstAtacantesARP:
+			respuesta = "HONEYNET"
+		else:
+			if dicMacIpSol.has_key(srcmac):
+				if dicMacIpSol[srcmac] == srcip:
+					respuesta = "LAN"
+				else:
+					del dicMacIpSol[srcmac]
+			else:
+				
+				if dicSolicitudesARP.has_key(srcip):
+					if dicRespuestasARP.has_key(srcip):
+						dicRespuestasARP[dstip] = dicRespuestasARP[dstip] + 1
+						
+						if dicRespuestasARP[srcip] <= dicSolicitudesARP[srcip]:
+							respuesta = "LAN"
+						else:
+							lstAtacantesARP.append(srcmac)					
+							respuesta = "HONEYNET"					
+						
+					else:
+						dicRespuestasARP[srcip]= 1
+						respuesta = "LAN"			
 
-
-    elif protocolo == 2:
-        if srcip in lstARP:
-            lstARP.remove(srcip)
-            respuesta = "LAN"
-
-        else:
-            respuesta = "HONEYNET"
-
-        return respuesta
+				else:
+					lstAtacantesARP.append(srcmac)					
+					respuesta = "HONEYNET"        
     else:
-        return "LAN"
+        respuesta = "LAN"
+		
+	return respuesta
 			
 
 	
