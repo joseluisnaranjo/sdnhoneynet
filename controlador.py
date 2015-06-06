@@ -22,11 +22,10 @@ from ConfigParser import ConfigParser
 class ControladorHoneynet(DynamicPolicy):
     config = ConfigParser()
     config.read("honeynet.cfg")
-	
-	dicSolicitudesARP = {} #arp
-	dicRespuestasARP = {} #arp
-	dicMacIp = {} #arp
-	ListaAtacantesARP = [] # arp
+    dicSolicitudesARP = {} #arp
+    dicRespuestasARP = {} #arp
+    dicMacIp = {} #arp
+    ListaAtacantesARP = [] # arp
 
     IpMac = {} #ip
     Paquete = Packet() #ip
@@ -63,7 +62,7 @@ class ControladorHoneynet(DynamicPolicy):
     ipBroadcast = config.get("IPS","ipBroadcast") # tcp
     macGateway = config.get("MACS","macGateway") #udp
     num_max_conexiones = config.getint("CONEXIONES","numeroConexiones") # tcp
-	num_max_solicitudes = confi.getint("SOLICITUDES", "numeroSolicitudes") #arp
+    num_max_solicitudes = config.getint("SOLICITUDES", "numeroSolicitudes") #arp
     proceso = config.getint("PROCESOS","proceso") # General
 
     print "Ejecutando la aplicacion para el controlador de la Honeynet... "
@@ -108,7 +107,7 @@ class ControladorHoneynet(DynamicPolicy):
 					if protocolo == 6:
 						respuesta = tcp.tcp_syn_flood(pkt, self.ListaAtacantes, self.ListaClientes, self.ListaSolicitudes, self.IpNumSOLT, self.IpNumCLIT, self.ipServidor, self.num_max_conexiones, self.tamano_max_listasolicitudes)
 						if respuesta == "LAN":							
-							if dstport == 443 or srcport == 443:
+							if true:
 								respuesta = https.thc_ssl_dos(red, pkt, self.ListaAtacantesT, self.ListaClientesT, self.ListaSolicitudesT, self.IpNumC, self.IpNumS)
 							else:
 								respuesta = "LAN"
@@ -156,11 +155,14 @@ class ControladorHoneynet(DynamicPolicy):
 
 
 
-        elif self.proceso == 4:
+            '''elif self.proceso == 4:
             if tipoPkt == 2048 and protocolo == 17:
                 respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesDNS, MAC(self.macGateway))
             else:
-				respuesta = "LAN"
+		    respuesta = "LAN"'''
+        elif self.proceso == 4:
+            respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesDNS, MAC(self.macGateway))
+
 
 
 
@@ -175,14 +177,17 @@ class ControladorHoneynet(DynamicPolicy):
 
 				
         if self.proceso == 6:
-
-            if tipoPkt == 2048 and protocolo == 6:
-                respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_conexiones)
-            else:
-                if (srcip in self.lstAtacantesS):
-                        respuesta  = "HONEYNET"
+            try:
+                if tipoPkt == 2048 and protocolo == 6:
+                    respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_conexiones)
                 else:
-                        respuesta = "LAN"
+                    if (srcip in self.lstAtacantesS):
+                            respuesta  = "HONEYNET"
+                    else:
+                            respuesta = "LAN"
+            except:
+                print("ERROR TCP")
+
 
 
         if respuesta == "LAN":

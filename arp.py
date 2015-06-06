@@ -15,27 +15,24 @@ from pyretic.lib.query import *
 
 
 def arp_spoofing(pkt,dicSolicitudesARP,dicRespuestasARP, dicMacIpSol, lstAtacantesARP, numerosolicitudes):
-    protocolo = pkt['protocol']
-    dstip  = pkt['dstip']
-    srcip = pkt['srcip']
-	procesando = false
-    respuesta = ""
+	protocolo = pkt['protocol']
+	dstip  = pkt['dstip']
+	srcip = pkt['srcip']
+	srcmac = pkt['srcmac']
+	respuesta = ""
 
 
-    if protocolo == 1:
+	if protocolo == 1:
 		dicMacIpSol[srcmac]= srcip
+		if dicSolicitudesARP.has_key(dstip):
+			dicSolicitudesARP[dstip] = dicSolicitudesARP[dstip] + 1
+			respuesta = "LAN"
 
-        if dicSolicitudesARP.has_key(dstip):
-			if dicSolicitudesARP[dstip] <= numerosolicitudes :
-				dicSolicitudesARP[dstip] = dicSolicitudesARP[dstip] + 1
-				respuesta = "LAN"
-			else:
-				respuesta = "FIN"
-        else:
-            dicSolicitudesARP[dstip]= 1
-            respuesta = "LAN"
+		else:
+			dicSolicitudesARP[dstip]= 1
+			respuesta = "LAN"
         
-    elif protocolo == 2:		
+	elif protocolo == 2:
 		if srcmac in lstAtacantesARP:
 			respuesta = "HONEYNET"
 		else:
@@ -45,26 +42,18 @@ def arp_spoofing(pkt,dicSolicitudesARP,dicRespuestasARP, dicMacIpSol, lstAtacant
 				else:
 					del dicMacIpSol[srcmac]
 			else:
-				
 				if dicSolicitudesARP.has_key(srcip):
-					if dicRespuestasARP.has_key(srcip):
-						dicRespuestasARP[dstip] = dicRespuestasARP[dstip] + 1
-						
-						if dicRespuestasARP[srcip] <= dicSolicitudesARP[srcip]:
-							respuesta = "LAN"
-						else:
-							lstAtacantesARP.append(srcmac)					
-							respuesta = "HONEYNET"					
-						
+					if  dicSolicitudesARP[srcip] >= 0:
+						dicSolicitudesARP[srcip] = dicSolicitudesARP[srcip] - 1
+						respuesta = "LAN"
 					else:
-						dicRespuestasARP[srcip]= 1
-						respuesta = "LAN"			
-
+						lstAtacantesARP.append(srcmac)
+						respuesta = "HONEYNET"
 				else:
 					lstAtacantesARP.append(srcmac)					
 					respuesta = "HONEYNET"        
-    else:
-        respuesta = "LAN"
+	else:
+		respuesta = "LAN"
 		
 	return respuesta
 			

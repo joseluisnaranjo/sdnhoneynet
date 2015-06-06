@@ -15,9 +15,9 @@ from pyretic.lib.query import *
 
 
 def smurf(pkt, ipBroadcast):
-	srcip = pkt['srcip']
-	
-	if (srcip == ipBroadcast):
+	dstip = pkt['dstip']
+
+	if (dstip == ipBroadcast):
 		print ("Paquete peligroso...")
 		respuesta = "HONEYNET"
 
