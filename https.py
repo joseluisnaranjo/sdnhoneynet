@@ -73,9 +73,11 @@ def thc_ssl_dos( pkt, lstAtacantes, dicSolicitudes, dicClientes ,ipServidor, num
                     else:
                         if dicClientes.has_key(srcip):
                             try:
-                                dicClientes[srcip] = dicClientes[srcip] - 1
+                                if dicClientes[srcip] >= 0:
+                                    dicClientes[srcip] = dicClientes[srcip] - 1
                                 print "Paquete legitimo......"
                                 respuesta  = "LAN"
+
 
                             except:
                                 print "El diccionario de clientes esta en 0"
