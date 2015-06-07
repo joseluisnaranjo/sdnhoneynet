@@ -15,78 +15,57 @@ from ConfigParser import ConfigParser
 
 
 
-def ip_spoofing(pkt, IpMac, paquete, lstSrcMac, lstMacAtacante, ipGateway):
-   
-    protocolo = pkt['protocol']
-    srcip  = pkt['srcip']
-    dstip = pkt['dstip']
-    srcmac = pkt['srcmac']
+def ip_spoofing(pkt, dicIpMac, dicMacPuerto, lstMacAtacante, puertoHoneynet):
+    tipoPkt = ""
+    srcip = ""
 
-    of_payload_code = pkt['raw']
-    of_payload = of_payload_code.encode("hex")
-    icmp_replay = str(of_payload[68:70])
+    try:
+        srcmac = pkt['srcmac']
+        tipoPkt = pkt['ethtype']
+        srcip = pkt['srcip']
 
-    if protocolo == 1:
-		if ((icmp_replay == "00" ) and (dstip == ipGateway)):
-			lstSrcMac.append(srcmac)
-			time.sleep(1)
-			if (len(lstSrcMac)>1):
-				for i in lstSrcMac:
-					if i == paquete['srcmac']:
-						lstMacAtacante.append(paquete['srcmac'])
-						lstSrcMac.clear()
-						paquete = Packet()
-						print ("Paquete peligroso")
-						respuesta = "HONEYNET"
-
-					else :
-						respuesta = ""
-			else:
-				IpMac[srcip] = srcmac
-				lstSrcMac.clear()
-				paquete = Packet()
-				print ("Paquete legitimo")
-				respuesta = "LAN"
-
-		else:
-			respuesta = verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
+        dstmac = pkt ['dstmac']
+    except:
+        print "Error"
+    respuesta = ""
 
 
+    if srcmac in lstMacAtacante:
+        respuesta = "HONEYNET"
     else:
-        respuesta = verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante)
+        if tipoPkt == 2054:
+            dicIpMac[srcip]= srcmac
+            return  "TODO"
+        elif tipoPkt == 2048:
+            inport = pkt['inport']
+            if inport == puertoHoneynet:
+                if dicMacPuerto.has_key(dstmac):
+                    return "ATACANTE"
+                else:
+                    return "FIN"
+            else:
+                if dicIpMac.has_key(srcip):
+                    if srcmac == dicIpMac[srcip]:
+                        respuesta = "LAN"
+                    else :
+                        lstMacAtacante.append(srcmac)
+
+                        dicMacPuerto[srcmac] = inport
+                        respuesta = "HONEYNET"
+                else:
+                    respuesta = "LAN"
+
 
     return respuesta
 
 
-def verificarIpSpoofing(IpMac, pkt, ipGateway, paquete, lstMacAtacante):
-    srcmac = pkt['srcmac']
-    srcip = pkt['srcip']
+def payload(pkt,num1,num2):
+    of_payload_code = pkt['raw']
+    of_payload = of_payload_code.encode("hex")
+    bandera = of_payload[num1:num2]
+    return bandera
 
-    if (srcmac in lstMacAtacante):
-        print ("Paquete peligroso")
-        respuesta = "HONEYNET"
 
-    else:
-        if (IpMac.has_key(srcip)):
-            if (IpMac[srcip]== srcmac):
-                print ("Paquete conocido... ")
-                respuesta = "LAN"
 
-            else:
-                if (paquete == Packet()):
-                    print ("Enviar un ping a: " + str(pkt['srcip']))
-                    paquete = pkt
-                    comando = "sudo hping3 -1 -c 1" + str(srcip) + " -a " + str(ipGateway)
-                    print comando
-                    os.system(comando)
-                    respuesta = ""
-                else:
-                    respuesta = ""
-        else:
-            IpMac[srcip] = srcmac
-            print("Paquete nuevo...")
-            respuesta = "LAN"
-			
-	return respuesta
 
 #Clase terminada  completamente... Revisar!!!!
