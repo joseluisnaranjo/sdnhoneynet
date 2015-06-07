@@ -28,6 +28,7 @@ class ControladorHoneynet(DynamicPolicy):
     ListaAtacantesARP = [] # arp
 
     IpMac = {} #ip
+    MacPuerto = {} # ip
     Paquete = Packet() #ip
     lstSrcMac = [] #ip
     lstMacAtacante = [] #ip
@@ -39,6 +40,7 @@ class ControladorHoneynet(DynamicPolicy):
     dicSolicitudesS = {}  # ssl
     lstAtacantesS = []  # ssl
     dicClientesS = {}  # ssl
+    dicMacPuertoS = {} # ssl
 
 
     ListaSolicitudesS = []
@@ -90,6 +92,7 @@ class ControladorHoneynet(DynamicPolicy):
             red = self.network
             protocolo = pkt['protocol']
             srcip = pkt['srcip']
+            dstmac = pkt ['dstmac']
 
         except:
             print pkt
@@ -133,10 +136,7 @@ class ControladorHoneynet(DynamicPolicy):
 
 
         elif self.proceso == 2:
-			if tipoPkt == 2048:
-				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.Paquete, self.lstSrcMac, self.lstMacAtacante, self.ipGateway)
-			else:
-				respuesta = "LAN"
+			respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.MacPuerto, self.lstMacAtacante, self.puertoHoneynet)
 
 
 
@@ -154,12 +154,6 @@ class ControladorHoneynet(DynamicPolicy):
                 print("ERROR TCP")
 
 
-
-            '''elif self.proceso == 4:
-            if tipoPkt == 2048 and protocolo == 17:
-                respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesDNS, MAC(self.macGateway))
-            else:
-		    respuesta = "LAN"'''
         elif self.proceso == 4:
             respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesDNS, MAC(self.macGateway))
 
@@ -190,10 +184,16 @@ class ControladorHoneynet(DynamicPolicy):
 
 
 
+
+
         if respuesta == "LAN":
             enviar.enviar_paquete(pkt, red, self.puertoHoneynet)
         elif respuesta == "HONEYNET":
             enviar.enviar_Honeynet(pkt, red, self.puertoHoneynet)
+        elif respuesta == "TODO":
+            enviar.enviar_todo(pkt, red)
+        elif respuesta == "ATACANTE":
+            enviar.enviar_Honeynet(pkt, red,self.MacPuerto[dstmac])
 
 
 def main():
