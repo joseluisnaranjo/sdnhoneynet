@@ -8,8 +8,10 @@
 ###################################################################################
 
 from pyretic.lib.corelib import *
+from ConfigParser import ConfigParser
 
-def enviar_Lan(paquete, network, puertoHoneynet):
+def enviar_paquete(paquete, network, puertoHoneynet):
+
     switch = paquete['switch']
     inport = paquete['inport']
 
@@ -22,15 +24,10 @@ def enviar_Lan(paquete, network, puertoHoneynet):
 def enviar_Honeynet(paquete, network, puertoHoneynet):
     paquete = paquete.modify(outport=puertoHoneynet)
     network.inject_packet(paquete)
-    print "Paquete enviado al puerto: " + str(puertoHoneynet)
+    print "Paquete enviado a la HONEYNET !!..."
 
 
-def enviar_Todo(pkt,network):
-    switch = paquete['switch']
-    inport = paquete['inport']
-
-    for port in network.topology.egress_locations() - {Location(switch, inport)}:
-        puerto = port.port_no
-        paquete = paquete.modify(outport=puerto)
-        network.inject_packet(paquete)
-        print "Paquete enviado a toda la RED!!..."
+def send(pkt,network, puerto):
+        rp = pkt.modify(outport=puerto)
+        network.inject_packet(rp)
+        print "Paquete enviado a la LAN!!..."

@@ -15,21 +15,14 @@ from pyretic.lib.query import *
 
 
 def smurf(pkt, ipBroadcast):
+	dstip = pkt['dstip']
 
-	try:
-		tipoPkt = pkt['ethtype']
-		protocolo = pkt['protocol']
-		dstip = pkt['dstip']
-	except:
-		print "Error"
-	
-	if tipoPkt == 2048 and protocolo == 1:		
-		if (dstip == ipBroadcast):			
-			respuesta = "HONEYNET"
+	if (dstip == ipBroadcast):
+		print ("Paquete peligroso...")
+		respuesta = "HONEYNET"
 
-		else:
-			respuesta = "LAN"
 	else:
+		print ("Paquete legitimo...")
 		respuesta = "LAN"
 	return respuesta
 	

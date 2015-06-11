@@ -19,14 +19,14 @@ def ip_spoofing(pkt, dicIpMac, dicMacPuerto, lstMacAtacante, puertoHoneynet):
     tipoPkt = ""
     srcip = ""
 
-    try:        
+    try:
+        srcmac = pkt['srcmac']
         tipoPkt = pkt['ethtype']
         srcip = pkt['srcip']
+
         dstmac = pkt ['dstmac']
-		srcmac = pkt['srcmac']
     except:
         print "Error"
-		
     respuesta = ""
 
 

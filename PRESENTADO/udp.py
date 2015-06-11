@@ -7,30 +7,46 @@
 # Fecha: Lunes  20 de  Octubre de 2014                                            #
 ###################################################################################
 
-import collections
-
+import enviar
 from pyretic.lib.corelib import *
-from pyretic.lib.std import *
 from pyretic.lib.query import *
 
-
-def smurf(pkt, ipBroadcast):
-
+def dns_spoofing(pkt, ListaAtacantesDNS, macGateway):
 	try:
+		dstmac = pkt['dstmac']
+		srcmac = pkt['srcmac']
 		tipoPkt = pkt['ethtype']
 		protocolo = pkt['protocol']
-		dstip = pkt['dstip']
 	except:
-		print "Error"
-	
-	if tipoPkt == 2048 and protocolo == 1:		
-		if (dstip == ipBroadcast):			
-			respuesta = "HONEYNET"
+		return "LAN"
 
-		else:
-			respuesta = "LAN"
+	respuesta = ""
+
+	dns_flags = payload(pkt,88,92)
+
+	if srcmac in ListaAtacantesDNS:
+		respuesta = "HONEYNET"
 	else:
-		respuesta = "LAN"
+		if tipoPkt == 2048 and protocolo == 17:
+			if (dns_flags == '0100'):
+			#si es respuesta
+				if dstmac ==  macGateway:
+					respuesta = "LAN"
+				else:
+					ListaAtacantesDNS.append(dstmac)
+					respuesta = "FIN"
+			else:
+				#si es pregunta
+				respuesta = "LAN"
+		else:
+			#si es pregunta
+			respuesta = "LAN"
+
 	return respuesta
+
+
 	
-#Clase terminada  completamente... Revisar!!!!
+def payload(pkt,num1,num2):
+    of_payload_code = pkt['raw']
+    of_payload = of_payload_code.encode("hex")
+    return of_payload[num1:num2]

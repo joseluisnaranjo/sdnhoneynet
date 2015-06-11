@@ -13,10 +13,10 @@ from pyretic.lib.query import *
 
 def dns_spoofing(pkt, ListaAtacantesDNS, macGateway):
 	try:
-		dstmac = pkt['dstmac']
-		srcmac = pkt['srcmac']
 		tipoPkt = pkt['ethtype']
 		protocolo = pkt['protocol']
+		dstmac = pkt['dstmac']
+		srcmac = pkt['srcmac']
 	except:
 		return "LAN"
 
@@ -50,3 +50,6 @@ def payload(pkt,num1,num2):
     of_payload_code = pkt['raw']
     of_payload = of_payload_code.encode("hex")
     return of_payload[num1:num2]
+	
+
+#Clase terminada  completamente... Revisar!!!!

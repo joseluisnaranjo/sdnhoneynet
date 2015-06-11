@@ -1,0 +1,47 @@
+sudo ovs-vsctl add-br s1 
+sudo ovs-vsctl add-port s1 eth0
+sudo ovs-vsctl del-port s1 eth0
+sudo ovs-vsctl set-controller s1 tcp:192.168.200.128:6633
+sudo ovs-vsctl set-controller s1 tcp:192.168.200.128:6633 ptcp:6634
+sudo ovs-vsctl show
+
+sudo ovs-ofctl show s1
+sudo ovs-ofctl dump-flows s1
+sudo ovs-ofctl del-flows
+
+sudo ovs-vsctl set bridge s1 other-config:datapath-id=0000000000000001
+
+
+
+
+
+SCRIPT
+sudo ovs-vsctl add-br s1 
+sudo ovs-vsctl add-port s1 eth1
+sudo ovs-vsctl add-port s1 eth2
+sudo ovs-vsctl add-port s1 eth3
+sudo ovs-vsctl set-controller s1 tcp:192.168.0.100:6633 ptcp:6634
+sudo ovs-vsctl set bridge s1 other-config:datapath-id=0000000000000001
+
+location:      	1	2	None
+source:        	10.0.0.2	00:00:00:00:00:02
+dest:          	10.0.0.1	00:00:00:00:00:01
+md5:           ef4acd3a8a551d0ddb2c726251ebc923
+ethtype:       	2054
+header_len:    	14
+payload_len:   	28
+protocol:      	1
+
+
+http://ricardoperez.ingenieriaupoli.net/2013/05/20/hackeando-redes-mediante-el-protocolo-ipv4/
+
+INSTALAR EL SWITCH
+
+sudo ./boot.sh
+sudo ./configure --with-linux=/lib/modules/`uname -r`/build
+sudo make && make install
+sudo mkdir -p /usr/local/etc/openvswitch
+sudo ovsdb-tool create /usr/local/etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
+sudo ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock --remote=db:Open_vSwitch,Open_vSwitch,manager_options --pidfile --detach
+sudo ovs-vsctl --no-wait init
+sudo ovs-vswitchd --pidfile --detach
