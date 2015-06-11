@@ -60,7 +60,6 @@ def thc_ssl_dos( pkt, lstAtacantes, dicSolicitudes, dicClientes ,ipServidor, num
 							respuesta  = "LAN"
 
 			else:
-
 				if (str(ssl_dato1) == "17") or (str(ssl_dato2) == "17"):
 					if dicSolicitudes.has_key(srcip):
 						del dicSolicitudes[srcip]
@@ -72,15 +71,11 @@ def thc_ssl_dos( pkt, lstAtacantes, dicSolicitudes, dicClientes ,ipServidor, num
 							 dicClientes[srcip] = 1							
 							 respuesta  = "LAN"
 						else:
-							if dicClientes.has_key(srcip):
-								try:
-									if dicClientes[srcip] >= 0:
-										dicClientes[srcip] = dicClientes[srcip] - 1									
-									respuesta  = "LAN"
+							if dicClientes.has_key(srcip):								
+								if dicClientes[srcip] >= 0:
+									dicClientes[srcip] = dicClientes[srcip] - 1									
+								respuesta  = "LAN"
 
-
-								except:
-									respuesta ="LAN"
 				else:
 					if srcip in lstAtacantes:
 						respuesta  = "HONEYNET"

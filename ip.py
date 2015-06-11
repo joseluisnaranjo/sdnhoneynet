@@ -49,7 +49,6 @@ def ip_spoofing(pkt, dicIpMac, dicMacPuerto, lstMacAtacante, puertoHoneynet):
                         respuesta = "LAN"
                     else :
                         lstMacAtacante.append(srcmac)
-
                         dicMacPuerto[srcmac] = inport
                         respuesta = "HONEYNET"
                 else:

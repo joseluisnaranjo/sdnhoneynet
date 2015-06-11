@@ -56,7 +56,6 @@ def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, nu
 							respuesta  = "LAN"
 
 			else:
-				print str(tcp_flags)
 				if str(tcp_flags) == "10":
 					if dicSolicitudes.has_key(srcip):
 						del dicSolicitudes[srcip]
@@ -69,22 +68,23 @@ def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, nu
 							 respuesta  = "LAN"
 						else:
 							if dicClientes.has_key(srcip):
-								try:
-									dicClientes[srcip] = dicClientes[srcip] - 1
-									respuesta  = "LAN"
+								if dicClientes[srcip] >= 0:
+									dicClientes[srcip] = dicClientes[srcip] - 1									
+								respuesta  = "LAN"								
 
-								except:
-									respuesta ="LAN"
 				else:
-					respuesta  = "LAN"
+					if srcip in lstAtacantes:
+						respuesta  = "HONEYNET"
+					else:
+						respuesta  = "LAN"
 	else:
-		if (srcip in self.lstAtacantesS):
+		if (srcip in lstAtacantes):
 			respuesta  = "HONEYNET"
         else:
-            respuesta = "LAN"	
-
-			
+            respuesta = "LAN"				
 	return respuesta
+	
+	
 
 def payload(pkt,num1,num2):
     of_payload_code = pkt['raw']
