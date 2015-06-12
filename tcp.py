@@ -12,15 +12,15 @@ from ConfigParser import ConfigParser
 
 
 def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, num_max_conexiones):
+	srcip = ""
 	try :
 		tipoPkt = pkt['ethtype']
 		protocolo = pkt['protocol']
 		srcip = pkt['srcip']
 	except:
 		print "Error"
-		
-    tcp_flags = payload(pkt, 94, 96)
-    respuesta = ""
+	tcp_flags = payload(pkt, 94, 96)
+	respuesta = ""
 	
 	if tipoPkt == 2048 and protocolo == 6:
 		if ipServidor == srcip:
@@ -80,8 +80,8 @@ def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, nu
 	else:
 		if (srcip in lstAtacantes):
 			respuesta  = "HONEYNET"
-        else:
-            respuesta = "LAN"				
+		else:
+			respuesta = "LAN"
 	return respuesta
 	
 	

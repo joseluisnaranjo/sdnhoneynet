@@ -1,4 +1,3 @@
-
 ###################################################################################
 #                        ESCUELA POLITECNICA NACIONAL                             #
 # ------------------------------------------------------------------------------  #
@@ -14,65 +13,73 @@ from pyretic.lib.std import *
 from pyretic.lib.query import *
 
 
-def arp_spoofing(pkt,dicSolicitudesARP, dicMacIpSol, lstAtacantesARP):
+def arp_spoofing(pkt,dicSolicitudesARP, dicMacIpSol,  dicMacPuerto, lstAtacantesARP):
 	try:
 		tipoPkt = pkt['ethtype']
+
+	except:
+		print ""
+	respuesta = ""
+	if tipoPkt == 2054:
 		protocolo = pkt['protocol']
 		dstip  = pkt['dstip']
 		srcip = pkt['srcip']
 		srcmac = pkt['srcmac']
-	except:
-		print ""
-		
-	respuesta = ""
+		dstmac = pkt['dstmac']
+		if dstmac in lstAtacantesARP:
+			return "ATACANTE"
+		elif srcmac in lstAtacantesARP:
+			return "HONEYNET"
 
-	if tipoPkt == 2054:
-		if protocolo == 1:
-			dicMacIpSol[srcmac]= srcip
-			if dicSolicitudesARP.has_key(dstip):
-				dicSolicitudesARP[dstip] = dicSolicitudesARP[dstip] + 1
-				respuesta = "LAN"
+		elif tipoPkt == 2054:
+			inport = pkt['inport']
+			if protocolo == 1:
+				dicMacIpSol[srcmac]= srcip
+				if dicSolicitudesARP.has_key(dstip):
 
-			else:
-				dicSolicitudesARP[dstip]= 1
-				respuesta = "LAN"
-			
-		elif protocolo == 2:
-			if srcmac in lstAtacantesARP:
-				respuesta = "HONEYNET"
-			else:
-				if dicMacIpSol.has_key(srcmac):
-					if dicMacIpSol[srcmac] == srcip:						
-						if  dicSolicitudesARP[srcip] >= 0:
-							dicSolicitudesARP[srcip] = dicSolicitudesARP[srcip] - 1
+					dicSolicitudesARP[dstip] = dicSolicitudesARP[dstip] + 1
+					respuesta = "LAN"
+
+				else:
+					dicSolicitudesARP[dstip]= 1
+					respuesta = "LAN"
+
+			elif protocolo == 2:
+
+					if dicMacIpSol.has_key(srcmac):
+						if dicMacIpSol[srcmac] == srcip:
 							respuesta = "LAN"
+							if srcmac in lstAtacantesARP:
+								lstAtacantesARP.remove(srcmac)
+
 						else:
-							lstAtacantesARP.append(srcmac)
 							del dicMacIpSol[srcmac]
 							respuesta = "HONEYNET"
-						
+
+
 					else:
-						del dicMacIpSol[srcmac]
-				else:
-					if dicSolicitudesARP.has_key(srcip):
-						if  dicSolicitudesARP[srcip] >= 0:
-							dicSolicitudesARP[srcip] = dicSolicitudesARP[srcip] - 1
-							respuesta = "LAN"
+						if dicSolicitudesARP.has_key(srcip):
+							if  dicSolicitudesARP[srcip] >= 0:
+								dicSolicitudesARP[srcip] = dicSolicitudesARP[srcip] - 1
+								respuesta = "LAN"
+							else:
+								lstAtacantesARP.append(srcmac)
+								dicMacPuerto[srcmac]= inport
+								respuesta = "HONEYNET"
 						else:
 							lstAtacantesARP.append(srcmac)
+							dicMacPuerto[srcmac]= inport
 							respuesta = "HONEYNET"
-					else:
-						lstAtacantesARP.append(srcmac)					
-						respuesta = "HONEYNET"        
+			else:
+				respuesta = "LAN"
 		else:
 			respuesta = "LAN"
-	else :
-		if srcmac in lstAtacantesARP:
-			respuesta = "HONEYNET"
-        else:
-			respuesta = "LAN"		
-	return respuesta
-			
+			print pkt
+	else:
+		respuesta = "LAN"
 
-	
+	return respuesta
+
+
+
 #Clase terminada  completamente... Revisar!!!!

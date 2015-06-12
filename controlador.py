@@ -25,6 +25,7 @@ class ControladorHoneynet(DynamicPolicy):
 	
     dicSolicitudesARP = {} #arp
     dicMacIp = {} #arp
+    dicMacPuertoARP = {} # ip
     ListaAtacantesARP = [] # arp
 
     IpMac = {} #ip
@@ -50,7 +51,6 @@ class ControladorHoneynet(DynamicPolicy):
     num_max_solicitudes = config.getint("SOLICITUDES", "numeroSolicitudes") #arp
     proceso = config.getint("PROCESOS","proceso") # General
 
-    print "Ejecutando la aplicación para el controlador de la Honeynet... "
 
     def __init__(self):
 		print "Se iniciara el constructor de la clase.."
@@ -78,7 +78,7 @@ class ControladorHoneynet(DynamicPolicy):
         respuesta = ""
 			
         if self.proceso == 0:
-			respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesARP, self.dicMacIp, self.ListaAtacantesARP)
+			respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesARP, self.dicMacIp,self.dicMacPuertoARP, self.ListaAtacantesARP)
 			if respuesta == "LAN":			
 				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.MacPuerto, self.lstMacAtacante, self.puertoHoneynet)
 				if respuesta == "LAN":
@@ -88,13 +88,13 @@ class ControladorHoneynet(DynamicPolicy):
 						if respuesta == "LAN":
 							respuesta = icmp.smurf(pkt, IP(self.ipBroadcast))
 							if respuesta == "LAN":		
-							respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_conexiones)
+							    respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_conexiones)
              
 
 
         elif self.proceso == 1:
-            respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesARP, self.dicMacIp, self.ListaAtacantesARP)
-            
+            respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesARP, self.dicMacIp,self.dicMacPuertoARP, self.ListaAtacantesARP)
+
 
         elif self.proceso == 2:
 			respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.MacPuerto, self.lstMacAtacante, self.puertoHoneynet)
