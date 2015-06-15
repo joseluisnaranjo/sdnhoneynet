@@ -11,7 +11,7 @@ import enviar
 from pyretic.lib.corelib import *
 from pyretic.lib.query import *
 
-def dns_spoofing(pkt, ListaAtacantesDNS, macGateway):
+def dns_spoofing(pkt, ListaAtacantes, macGateway):
 	try:
 		tipoPkt = pkt['ethtype']
 		protocolo = pkt['protocol']
@@ -24,7 +24,7 @@ def dns_spoofing(pkt, ListaAtacantesDNS, macGateway):
 
 	dns_flags = payload(pkt,88,92)
 
-	if srcmac in ListaAtacantesDNS:
+	if srcmac in ListaAtacantes:
 		respuesta = "HONEYNET"
 	else:
 		if tipoPkt == 2048 and protocolo == 17:
@@ -33,7 +33,7 @@ def dns_spoofing(pkt, ListaAtacantesDNS, macGateway):
 				if dstmac ==  macGateway:
 					respuesta = "LAN"
 				else:
-					ListaAtacantesDNS.append(dstmac)
+					ListaAtacantes.append(dstmac)
 					respuesta = "FIN"
 			else:
 				#si es pregunta
