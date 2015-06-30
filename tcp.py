@@ -11,7 +11,7 @@ import collections
 from ConfigParser import ConfigParser
 
 
-def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, num_max_conexiones):
+def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, num_max_permitido):
 	srcip = ""
 	try :
 		tipoPkt = pkt['ethtype']
@@ -32,7 +32,7 @@ def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, nu
 
 				else:
 					if dicSolicitudes.has_key(srcip):
-						if dicSolicitudes[srcip] < num_max_conexiones:
+						if dicSolicitudes[srcip] < num_max_permitido:
 							dicSolicitudes[srcip] = dicSolicitudes[srcip] + 1
 							respuesta  = "LAN"
 						else:
@@ -43,7 +43,7 @@ def tcp_syn_flood(pkt, lstAtacantes, dicSolicitudes, dicClientes, ipServidor, nu
 						
 					else:
 						if dicClientes.has_key(srcip):
-							if dicClientes[srcip] < num_max_conexiones:
+							if dicClientes[srcip] < num_max_permitido:
 								dicClientes[srcip] = dicClientes[srcip] + 1
 								respuesta  = "LAN"
 							else:

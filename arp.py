@@ -23,10 +23,9 @@ def arp_spoofing(pkt,dicSolicitudes, dicMacIp,  dicMacPuerto, lstAtacantes):
 
 	except:
 		print ""
-	respuesta = ""
-	
+	respuesta = ""	
 		
-		elif tipoPkt == 2054:
+		if tipoPkt == 2054:
 			inport = pkt['inport']
 			protocolo = pkt['protocol']
 			dstip  = pkt['dstip']

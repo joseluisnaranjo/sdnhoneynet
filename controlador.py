@@ -23,42 +23,37 @@ class ControladorHoneynet(DynamicPolicy):
     config = ConfigParser()
     config.read("honeynet.cfg")
 	
-    dicSolicitudesARP = {} #arp
-    dicMacIp = {} #arp
-    dicMacPuertoARP = {} # ip
-    ListaAtacantesARP = [] # arp
+    dicSolicitudesA = {}
+    dicMacIpA = {}
+    dicMacPuertoA = {}
+    ListaAtacantesA = []
 
-    IpMac = {} #ip
-    MacPuerto = {} # ip
-    lstMacAtacante = [] #ip
+    dicIpMacI = {}
+    dicMacPuertoI = {}
+    lstMacAtacanteI = []
 
-    dicSolicitudesT = {}  # tcp
-    lstAtacantesT = []  # tcp
-    dicClientesT = {}  # tcp
+    dicSolicitudesT = {}    
+    dicClientesT = {}
+	lstAtacantesT = []
 
-    dicSolicitudesS = {}  # ssl
-    lstAtacantesS = []  # ssl
-    dicClientesS = {}  # ssl
+    dicSolicitudesS = {}    
+    dicClientesS = {} 
+	lstAtacantesS = []
 
-    ListaAtacantesDNS = [] # udp
+    ListaAtacantesU = [] 
 
 
     puertoHoneynet = config.getint("PUERTOS", "puertoHoneynet")
-    ipServidor = config.get("IPS","ipServidor") # tcp
-    ipBroadcast = config.get("IPS","ipBroadcast") # tcp
-    macGateway = config.get("MACS","macGateway") #udp
-    num_max_conexiones = config.getint("CONEXIONES","numeroConexiones") # tcp
-    num_max_solicitudes = config.getint("SOLICITUDES", "numeroSolicitudes") #arp
-    proceso = config.getint("PROCESOS","proceso") # General
+    ipServidor = config.get("IPS","ipServidor") 
+    ipBroadcast = config.get("IPS","ipBroadcast")
+    macGateway = config.get("MACS","macGateway")
+    num_max_permitido = config.getint("CONEXIONES","numeroConexiones") 
+    proceso = config.getint("PROCESOS","proceso")
 
 
-    def __init__(self):
+    def __init__(self):	
 		print "Se iniciara el constructor de la clase.."
 		self.query = packets()
-		self.remotes_ip = {}
-		self.IpPuerto = {}
-		self.IpMac = {}
-		self.IpMacAtacante = {}
 		self.query.register_callback(self.paquete)
 		self.network = None
 		super(ControladorHoneynet,self).__init__(self.query)
@@ -78,34 +73,34 @@ class ControladorHoneynet(DynamicPolicy):
         respuesta = ""
 			
         if self.proceso == 0:
-			respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesARP, self.dicMacIp,self.dicMacPuertoARP, self.ListaAtacantesARP)
+			respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesA, self.dicMacIpA,self.dicMacPuertoA, self.ListaAtacantesA)
 			if respuesta == "LAN":			
-				respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.MacPuerto, self.lstMacAtacante, self.puertoHoneynet)
+				respuesta = ip.ip_spoofing(pkt,  self.dicIpMacI, self.dicMacPuertoI, self.lstMacAtacanteI, self.puertoHoneynet)
 				if respuesta == "LAN":
-					respuesta = tcp.tcp_syn_flood(pkt, self.lstAtacantesT, self.dicSolicitudesT, self.dicClientesT, IP(self.ipServidor), self.num_max_conexiones)
+					respuesta = tcp.tcp_syn_flood(pkt, self.lstAtacantesT, self.dicSolicitudesT, self.dicClientesT, IP(self.ipServidor), self.num_max_permitido)
 					if respuesta == "LAN":
-						respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesDNS, MAC(self.macGateway))				
+						respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesU, MAC(self.macGateway))				
 						if respuesta == "LAN":
 							respuesta = icmp.smurf(pkt, IP(self.ipBroadcast))
 							if respuesta == "LAN":		
-							    respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_conexiones)
+							    respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_permitido)
              
 
 
         elif self.proceso == 1:
-            respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesARP, self.dicMacIp,self.dicMacPuertoARP, self.ListaAtacantesARP)
+            respuesta = arp.arp_spoofing(pkt, self.dicSolicitudesA, self.dicMacIpA, self.dicMacPuertoA, self.ListaAtacantesA)
 
 
         elif self.proceso == 2:
-			respuesta = ip.ip_spoofing(pkt,  self.IpMac, self.MacPuerto, self.lstMacAtacante, self.puertoHoneynet)
+			respuesta = ip.ip_spoofing(pkt,  self.dicIpMacI, self.dicMacPuertoI, self.lstMacAtacanteI, self.puertoHoneynet)
 
 
         elif self.proceso == 3:
-            respuesta = tcp.tcp_syn_flood(pkt, self.lstAtacantesT, self.dicSolicitudesT, self.dicClientesT, IP(self.ipServidor), self.num_max_conexiones)
+            respuesta = tcp.tcp_syn_flood(pkt, self.lstAtacantesT, self.dicSolicitudesT, self.dicClientesT, IP(self.ipServidor), self.num_max_permitido)
                
 
         elif self.proceso == 4:
-            respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesDNS, MAC(self.macGateway))
+            respuesta = udp.dns_spoofing(pkt, self.ListaAtacantesU, MAC(self.macGateway))
 
 
         elif self.proceso == 5:
@@ -113,7 +108,7 @@ class ControladorHoneynet(DynamicPolicy):
 			
 			
         elif self.proceso == 6:
-            respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_conexiones)
+            respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_permitido)
                       
 
 
@@ -124,7 +119,7 @@ class ControladorHoneynet(DynamicPolicy):
         elif respuesta == "TODO":
             enviar.enviar_Todo(pkt, red)
         elif respuesta == "ATACANTE":
-            enviar.enviar_Honeynet(pkt, red, self.MacPuerto[dstmac])
+            enviar.enviar_Honeynet(pkt, red, self.dicMacPuertoI[dstmac])
 
 
 def main():
