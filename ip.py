@@ -18,6 +18,7 @@ from ConfigParser import ConfigParser
 def ip_spoofing(pkt, dicIpMac, dicMacPuerto, lstMacAtacante, puertoHoneynet):
     tipoPkt = ""
     srcip = ""
+    srcmac = ""
 
     try:        
         tipoPkt = pkt['ethtype']
@@ -53,7 +54,7 @@ def ip_spoofing(pkt, dicIpMac, dicMacPuerto, lstMacAtacante, puertoHoneynet):
                         respuesta = "HONEYNET"
                 else:
                     respuesta = "LAN"
-		else:
+        else:
             respuesta = "LAN"
 
     return respuesta

@@ -34,11 +34,11 @@ class ControladorHoneynet(DynamicPolicy):
 
     dicSolicitudesT = {}    
     dicClientesT = {}
-	lstAtacantesT = []
+    lstAtacantesT = []
 
     dicSolicitudesS = {}    
     dicClientesS = {} 
-	lstAtacantesS = []
+    lstAtacantesS = []
 
     ListaAtacantesU = [] 
 
@@ -111,15 +111,17 @@ class ControladorHoneynet(DynamicPolicy):
             respuesta = https.thc_ssl_dos(pkt, self.lstAtacantesS, self.dicSolicitudesS, self.dicClientesS, IP(self.ipServidor), self.num_max_permitido)
                       
 
-
-        if respuesta == "LAN":
-            enviar.enviar_Lan(pkt, red, self.puertoHoneynet)
-        elif respuesta == "HONEYNET":
-            enviar.enviar_Honeynet(pkt, red, self.puertoHoneynet)
-        elif respuesta == "TODO":
-            enviar.enviar_Todo(pkt, red)
-        elif respuesta == "ATACANTE":
-            enviar.enviar_Honeynet(pkt, red, self.dicMacPuertoI[dstmac])
+        try:
+            if respuesta == "LAN":
+                enviar.enviar_Lan(pkt, red, self.puertoHoneynet)
+            elif respuesta == "HONEYNET":
+                enviar.enviar_Honeynet(pkt, red, self.puertoHoneynet)
+            elif respuesta == "TODO":
+                enviar.enviar_Todo(pkt, red)
+            elif respuesta == "ATACANTE":
+                enviar.enviar_Honeynet(pkt, red, self.dicMacPuertoI[dstmac])
+        except:
+            print ""
 
 
 def main():
